@@ -1,2 +1,27 @@
 # duboku-downloader
 复制链接，然后自定义下载第几集的独播库视频
+
+#### 图形界面:
+Windows-64 bit 用户可以下载 "独播库下载器_win_64_exe.zip", 解压缩后， 双击 "独播库下载器.exe" 文件执行。请确保附件 ffmpeg_minimal_ts_2_mp4.exe 与 "独播库下载器.exe" 在同一个目录。 
+
+命令行爱好者也可以 python duboku_gui.py 打开。
+
+#### 命令行界面:
+请自行参考 `python duboku_console.py --help`。
+
+例子1: python3 duboku_console.py https://www.fanstui.com/vodplay/300-1-46.html -d 庆余年/ --from-ep 1 -to-ep 5
+例子2: python3 duboku_console.py https://www.duboku.net/voddetail-1152.html -f 返校
+
+#### 注意事项:
+
+1. 下载过程是先下载多段 .ts 文件，组成单个 .ts 文件， 完成后才转换去 .mp4，没有转换会导致某些播放器无法正常跳转或某部分模糊。请确保下载完毕不是 .ts 而是 .mp4。
+2. 转换 .ts 去 .mp4 的过程会出现黑窗口几秒。
+3. 重复下载 .ts/.mp4 会覆盖原本的同名 .ts/.mp4。如果转换 ts 去 mp4 失败可能不会保留 .ts。
+4. 某段 .ts 下载失败会显示信息， 要不要重新下载该集取决于你。
+5. 网络有时候慢导致下载失败， 就停止等一阵子才尝试。 
+
+#### 示范视频 (点击图片会在 YouTube 打开):
+
+[![watch in youtube](https://i.ytimg.com/vi/eejUgl7Ku8E/hqdefault.jpg)](https://www.youtube.com/watch?v=eejUgl7Ku8E "独播库下载器")
+
+
