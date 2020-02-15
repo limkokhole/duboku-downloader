@@ -35,7 +35,6 @@ from logging.handlers import QueueHandler, QueueListener
 
 from PySide2 import QtCore
 from PySide2.QtCore import Qt, Slot, QProcess
-from PySide2.QtGui import QPainter
 from PySide2.QtWidgets import (QApplication, QMainWindow,
                                 QLayout, QHBoxLayout, QVBoxLayout,
                                 QWidget, QLabel, 
