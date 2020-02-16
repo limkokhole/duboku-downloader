@@ -91,7 +91,7 @@ from crypto_py_aes import main as crypto_py_aes_main
 import argparse
 from argparse import RawTextHelpFormatter
 arg_parser = argparse.ArgumentParser(
-    description='Extrat & download image url from html source file saved manually, in case you don\'t bother to research how to make url works in python', formatter_class=RawTextHelpFormatter)
+    description='Duboku Downloader', formatter_class=RawTextHelpFormatter)
 
 def quit(msgs, exit=True):
     if not isinstance(msgs, list):
