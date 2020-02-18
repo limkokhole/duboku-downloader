@@ -1,0 +1,19 @@
+
+#### Note to build windows ffmpeg_minimal_ts_2_mp4.exe:
+
+[1] Full code please clone from https://github.com/rdp/ffmpeg-windows-build-helpers , OR my backup repo https://github.com/limkokhole/ffmpeg-windows-build-helpers  
+
+[2] Modify cross_compile_ffmpeg.sh, run this script, select x64 only(build both x32/x64 would do double jobs and slow. ). Still, the first time to build can be few hours because it download/build dependency packages from scratch (And this is better than build from my system which packages version failed to match to cross compile ffmpeg successfully).  
+
+[3] When I build this exe, I modify cross_compile_ffmpeg.sh, and the cross_compile_ffmpeg_latest.sh is latest git at this time(without my modification). the latest script seems like fixed fribidi by speicifc commit id `fribidi_git 79581cc93b26c84edf74c9b51511126e0aacec9e`, while I simply disable fribidy and libass.  
+
+You can diff this 2 files to know what I've modified, e.g. with this command:  
+
+`dwdiff -C 0 -w "$(echo -e '\x1b[1;9m\x1b[1;91m')" -x "$(echo -e '\x1b[0m\x1b[K')" -y "$(tput bold; tput setaf 2)" -z "$(tput sgr0)" <(cat -v cross_compile_ffmpeg.sh) <(cat -v cross_compile_ffmpeg_latest.sh)`  
+
+but this is the most important config options part to make ts to mp4 works with minimal size while slightly faster coversion speed:  
+
+    #without enable-small (faster 1 second in average(2-3-4_seldom) vs --enable-small(3-4)):
+    config_options="$init_options --disable-everything --disable-network --disable-autodetect --disable-doc --disable-ffprobe --disable-swscale --disable-avdevice --disable-swresample --disable-bzlib --disable-sndio --disable-sdl2 --disable-libxcb_xfixes --disable-libxcb --disable-libxcb_shape --disable-libxcb_shm --disable-lzma --disable-iconv --disable-xlib --disable-zlib --enable-parser=aac --enable-bsf=extract_extradata --enable-muxer=mp4 --enable-demuxer=mpegts,aac,h264 --enable-decoder=aac,h264 --enable-parser=h264 --enable-protocol=file --enable-bsf=aac_adtstoasc"  
+
+
