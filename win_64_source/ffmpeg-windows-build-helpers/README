@@ -1,7 +1,7 @@
 
 #### Note to build windows ffmpeg_minimal_ts_2_mp4.exe:
 
-[1] Full code please clone from https://github.com/rdp/ffmpeg-windows-build-helpers , OR my backup repo https://github.com/limkokhole/ffmpeg-windows-build-helpers  
+[1] Full code please clone from https://github.com/rdp/ffmpeg-windows-build-helpers , OR my backup (not up to date) repo https://github.com/limkokhole/ffmpeg-windows-build-helpers  
 
 [2] Modify cross_compile_ffmpeg.sh, run this script, select x64 only(build both x32/x64 would do double jobs and slow. ). Still, the first time to build can be few hours because it download/build dependency packages from scratch (And this is better than build from my system which packages version failed to match to cross compile ffmpeg successfully).  
 
