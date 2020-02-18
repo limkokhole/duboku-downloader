@@ -1,7 +1,7 @@
 
 #### Note to build windows ffmpeg_minimal_ts_2_mp4.exe:
 
-[1] Try to familiar build ffmpeg for Linux first. ./configure --<your-options1> --<your-options2>; make -j4; This configure options will reflect on configure output section. E.g. parsers section means you can use --disable-parsers to disable all parsers while add --enable-parser(without 's')=xxx,yyy to enable only xxx and yyy for parsers. Careful --disable-parsers must on the left of --enable-parser=xxx,yyy . To learn basics of tiny/minimal build, read https://github.com/alberthdev/alberthdev-misc/wiki/Build-your-own-tiny-FFMPEG
+[1] Try to familiar build ffmpeg for Linux first. .`/configure --<your-options1> --<your-options2>; make -j4;` This configure options will reflect on configure output section. E.g. parsers section means you can use `--disable-parsers` to disable all parsers while add `--enable-parser(without 's')=xxx,yyy` to enable only xxx and yyy for parsers. Careful `--disable-parsers` must on the left of `--enable-parser=xxx,yyy` . To learn basics of tiny/minimal build, read https://github.com/alberthdev/alberthdev-misc/wiki/Build-your-own-tiny-FFMPEG
 
 [2] We need Linux to cross compile ffmpeg with the help of clean environment script. Full code please clone from https://github.com/rdp/ffmpeg-windows-build-helpers , OR my backup (not up to date) repo https://github.com/limkokhole/ffmpeg-windows-build-helpers  
 
@@ -13,7 +13,7 @@ You can diff this 2 files to know what I've modified, e.g. with this command:
 
 `dwdiff -C 0 -w "$(echo -e '\x1b[1;9m\x1b[1;91m')" -x "$(echo -e '\x1b[0m\x1b[K')" -y "$(tput bold; tput setaf 2)" -z "$(tput sgr0)" <(cat -v cross_compile_ffmpeg.sh) <(cat -v cross_compile_ffmpeg_latest.sh)`  
 
-but this is the most important config options part to make ts to mp4 works with minimal size while slightly faster coversion speed (Seems like my mistake to separate --enable-parser aac and h264 but it's same as aac,h264. But I don't expect put aac in this but this kind of addition very minor effect to file size since I already use aac in other options):  
+but this is the most important config options part to make ts to mp4 works with minimal size while slightly faster coversion speed (Seems like my mistake to separate -`-enable-parser` aac and h264 but it's same as `aac,h264`. But I don't expect put aac in this but this kind of addition very minor effect to file size since I already use aac in other options):  
 
     ```
     #without enable-small (faster 1 second in average(2-3-4_seldom) vs --enable-small(3-4)):
