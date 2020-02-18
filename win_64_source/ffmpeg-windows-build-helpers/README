@@ -5,7 +5,7 @@
 
 [2] Modify cross_compile_ffmpeg.sh, run this script, select x64 only(build both x32/x64 would do double jobs and slow. ). Still, the first time to build can be few hours because it download/build dependency packages from scratch (And this is better than build from my system which packages version failed to match to cross compile ffmpeg successfully).  
 
-[3] When I build this exe, I modify cross_compile_ffmpeg.sh, and the cross_compile_ffmpeg_latest.sh is latest git at this time(without my modification). the latest script seems like fixed fribidi by speicifc commit id `fribidi_git 79581cc93b26c84edf74c9b51511126e0aacec9e`, while I simply disable fribidy and libass.  
+[3] When I build this exe, I modify cross_compile_ffmpeg.sh, and the sample cross_compile_ffmpeg_latest.sh is latest git I copy at this time (without my modification). The latest script seems like already fixed fribidi by speicifc commit id `fribidi_git 79581cc93b26c84edf74c9b51511126e0aacec9e`, while I simply fix it by disable fribidy and libass previously.  
 
 You can diff this 2 files to know what I've modified, e.g. with this command:  
 
