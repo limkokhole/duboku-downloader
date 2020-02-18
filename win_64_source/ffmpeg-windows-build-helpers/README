@@ -18,7 +18,7 @@ but this is the most important config options part to make ts to mp4 works with 
     config_options="$init_options --disable-everything --disable-network --disable-autodetect --disable-doc --disable-ffprobe --disable-swscale --disable-avdevice --disable-swresample --disable-bzlib --disable-sndio --disable-sdl2 --disable-libxcb_xfixes --disable-libxcb --disable-libxcb_shape --disable-libxcb_shm --disable-lzma --disable-iconv --disable-xlib --disable-zlib --enable-parser=aac --enable-bsf=extract_extradata --enable-muxer=mp4 --enable-demuxer=mpegts,aac,h264 --enable-decoder=aac,h264 --enable-parser=h264 --enable-protocol=file --enable-bsf=aac_adtstoasc"
     ```
 
-And I noticed --disable-everything only replaced this options(but I recall without --disable-everything VS without --disable-demuxers seems former/latter produce more options, so be aware when narrow down):
+And I noticed --disable-everything only replaced this options(but I recall without --disable-everything VS without --disable-demuxers seems former/latter produce more options to use for --enable-demuxer, so be aware when narrow down):
     
     ```
     --disable-outdevs --disable-indevs --disable-protocols --disable-hwaccels --disable-parsers --disable-bsfs --disable-encoders --disable-decoders --disable-filters --disable-indev=v4l2 --disable-outdev=v4l2 --disable-v4l2-m2m --disable-muxers --disable-demuxers
