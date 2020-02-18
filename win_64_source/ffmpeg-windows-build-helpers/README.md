@@ -13,14 +13,14 @@ You can diff this 2 files to know what I've modified, e.g. with this command:
 
 `dwdiff -C 0 -w "$(echo -e '\x1b[1;9m\x1b[1;91m')" -x "$(echo -e '\x1b[0m\x1b[K')" -y "$(tput bold; tput setaf 2)" -z "$(tput sgr0)" <(cat -v cross_compile_ffmpeg.sh) <(cat -v cross_compile_ffmpeg_latest.sh)`  
 
-but this is the most important config options part to make ts to mp4 works with minimal size while slightly faster coversion speed (Seems like my mistake to separate -`-enable-parser` aac and h264 but it's same as `aac,h264`. But I don't expect put aac in this but this kind of addition very minor effect to file size since I already use aac in other options):  
+but this is the most important config options part to make ts to mp4 works with minimal size while slightly faster coversion speed (Seems like my mistake to separate -`-enable-parser` aac and h264 but it's same as `aac,h264`. But I don't expect put aac in this but this kind of addition very minor effect to file size and I use aac in other options):  
 
     ```
     #without enable-small (faster 1 second in average(2-3-4_seldom) vs --enable-small(3-4)):
     config_options="$init_options --disable-everything --disable-network --disable-autodetect --disable-doc --disable-ffprobe --disable-swscale --disable-avdevice --disable-swresample --disable-bzlib --disable-sndio --disable-sdl2 --disable-libxcb_xfixes --disable-libxcb --disable-libxcb_shape --disable-libxcb_shm --disable-lzma --disable-iconv --disable-xlib --disable-zlib --enable-parser=aac --enable-bsf=extract_extradata --enable-muxer=mp4 --enable-demuxer=mpegts,aac,h264 --enable-decoder=aac,h264 --enable-parser=h264 --enable-protocol=file --enable-bsf=aac_adtstoasc"
     ```
 
-And I noticed --disable-everything only replaced this options ( p/s: Careful --disable-demuxers might not included default, show --disable-demuxers far more than what you can see if not put --disable-demuxers, can see by put --disable-demuxers + enable_all VS no disable-demuxers + enable_all, so be aware when narrow down):
+And I noticed --disable-everything only replaced this options ( p/s: Careful `--disable-demuxers` might not included default, show `--disable-demuxers` far more than what you can see if not put `--disable-demuxers`, can see by put `--disable-demuxers + enable_all` VS `no disable-demuxers + enable_all`, so be aware when narrow down):
     
     ```
     --disable-outdevs --disable-indevs --disable-protocols --disable-hwaccels --disable-parsers --disable-bsfs --disable-encoders --disable-decoders --disable-filters --disable-indev=v4l2 --disable-outdev=v4l2 --disable-v4l2-m2m --disable-muxers --disable-demuxers
