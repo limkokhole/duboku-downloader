@@ -66,8 +66,7 @@ else:
 #user_agent_rotator = UserAgent(software_names=software_names, operating_systems=operating_systems, limit=100)
 # Get Random User Agent String.
 #UA = user_agent_rotator.get_random_user_agent()
-UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.100 Safari/537.36' 
-
+UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36'
 
 #from termcolor import cprint
 #import colorama
@@ -114,10 +113,11 @@ arg_parser.add_argument('-f', '--file', help='File name to save single movie (Do
 arg_parser.add_argument('-from-ep', '--from-ep', dest='from_ep', default=1, type=int, help='Specify the from episodes.')
 arg_parser.add_argument('-to-ep', '--to-ep', dest='to_ep',
                         type=int, help='Specify the to episodes.')
+arg_parser.add_argument('-p', '--proxy', help='Specify proxy of https')
 arg_parser.add_argument('url', nargs='?', help='Specify cinema url.')
 args, remaining = arg_parser.parse_known_args()
 
-def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout):
+def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_proxy=None):
 
     try:
         sys.stdout = custom_stdout
@@ -134,36 +134,49 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout):
 
         if not arg_url:
             print('main arg_url: ' + repr(arg_url))
-            quit('[!] [e1] Please specify cinema url in https://www.fanstui.com/voddetail-300.html. Abort.')
+            #quit('[!] [e1] Please specify cinema url in https://www.fanstui.com/voddetail-300.html. Abort.')
+            quit('[!] [e1] Please specify cinema url in https://www.duboku.net/voddetail-300.html. Abort.')
 
         # Should accept these formats:
         # https://www.fanstui.com/voddetail-300.html
         # https://www.fanstui.com/vodplay/300-1-1.html
         # https://www.fanstui.com/vp/529-1-1.html
-        VODPLAY_PREFIX = 'https://www.fanstui.com/vodplay/'
-        VP_PREFIX = 'https://www.fanstui.com/vp/'
+        #VODPLAY_PREFIX = 'https://www.fanstui.com/vodplay/'
+        VODPLAY_PREFIX = 'https://www.duboku.net/vodplay/'
+        VODDETAIL_PREFIX = 'https://www.duboku.net/voddetail/'
+        #VP_PREFIX = 'https://www.fanstui.com/vp/'
+        VP_PREFIX = 'https://www.duboku.net/vp/'
 
         cinema_url_post = '.html'
-        cinema_url_pre = 'https://www.fanstui.com/vodplay/'
-        arg_url_m = arg_url.replace('https://www.duboku.net/', 'https://www.fanstui.com/')
+        #cinema_url_pre = 'https://www.fanstui.com/vodplay/'
+        cinema_url_pre = 'https://www.duboku.net/vodplay/'
+        arg_url_m = arg_url #.replace('https://www.duboku.net/', 'https://www.fanstui.com/')
         try:
-            if arg_url_m.startswith('https://www.fanstui.com/voddetail-'):
-                cinema_id = int(arg_url_m.split('https://www.fanstui.com/voddetail-')[1].split('.html')[0])
+            #if arg_url_m.startswith('https://www.fanstui.com/voddetail-'):
+            if arg_url_m.startswith('https://www.duboku.net/voddetail-'):
+                #cinema_id = int(arg_url_m.split('https://www.fanstui.com/voddetail-')[1].split('.html')[0])
+                cinema_id = int(arg_url_m.split('https://www.duboku.net/voddetail-')[1].split('.html')[0])
                 cinema_id = str(cinema_id) #set back str after test int() ValueError
                 cinema_url_middle = '-1-'
             elif arg_url_m.startswith(VODPLAY_PREFIX):
                 cinema_id = int(arg_url_m.split(VODPLAY_PREFIX)[1].split('-')[0])
                 cinema_id = str(cinema_id)
                 cinema_url_middle = '-' + arg_url_m.split(VODPLAY_PREFIX)[1].split('-')[1] + '-'
+            elif arg_url_m.startswith(VODDETAIL_PREFIX):
+                cinema_id = int(arg_url_m.split(VODDETAIL_PREFIX)[1].split('.')[0])
+                cinema_id = str(cinema_id)
+                cinema_url_middle = '-1-'
             elif arg_url_m.startswith(VP_PREFIX):
                 cinema_id = int(arg_url_m.split(VP_PREFIX)[1].split('-')[0])
                 cinema_id = str(cinema_id)
                 cinema_url_middle = '-' + arg_url_m.split(VP_PREFIX)[1].split('-')[1] + '-'
             else:
-                quit('[!] [e2] Please specify cinema url in https://www.fanstui.com/voddetail-300.html. Abort.')
+                #quit('[!] [e2] Please specify cinema url in https://www.fanstui.com/voddetail-300.html. Abort.')
+                quit('[!] [e2] Please specify cinema url in https://www.dubokut.net/voddetail-300.html. Abort.')
         except ValueError as ve:
             print(ve)
-            quit('[!] [e3] Please specify cinema url in https://www.fanstui.com/voddetail-300.html. Abort.')
+            #quit('[!] [e3] Please specify cinema url in https://www.fanstui.com/voddetail-300.html. Abort.')
+            quit('[!] [e3] Please specify cinema url in https://www.duboku.net/voddetail-300.html. Abort.')
 
 
         if arg_file:
@@ -320,14 +333,28 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout):
 
         CP = CalmParser()
         walker = CalmWalker()
-
+        if arg_proxy:
+            arg_proxy = arg_proxy.strip()
+        if arg_proxy:
+            if not arg_proxy.startswith('http://') and not arg_proxy.startswith('https://') and not arg_proxy.startswith('socks5://'):
+                arg_proxy = 'http://' + arg_proxy
+            proxies = { 'https': arg_proxy, }
+            print('[...] 尝试代理: ' + proxies['https'])
+        else:
+            proxies = {}
+            print('[...] 无代理。')
         for ep in range(arg_from_ep, arg_to_ep):
             url = ''.join([cinema_url_pre, cinema_id, cinema_url_middle, str(ep), cinema_url_post]) #don't override template cinema_url
             if arg_file:
                 print('[...] 尝试 URL: ' + url)
             else:
                 print('[当前第{}集] 尝试 URL: {}'.format(ep, url) )
-            r = requests.get(url, allow_redirects=True, headers=http_headers, timeout=30)
+            try:
+                r = requests.get(url, allow_redirects=True, headers=http_headers, timeout=30, proxies=proxies)
+            except requests.exceptions.ProxyError as pe:
+                print('[😞] 代理错误。请检查您的代理。确保有端口号(port number)， 例如端口1234: http://127.0.0.1:1234\n')
+                print(traceback.format_exc())
+                break
             soup = BeautifulSoup(r.text, 'html.parser')
 
             ct_b64 = '' #reset
@@ -376,7 +403,7 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout):
                                             
                                     else: #single video normally came here
                                         #print('NEW url type? ' + repr(ep_url))
-                                        r_iframe = requests.get(ep_url, allow_redirects=True, headers=http_headers, timeout=30)
+                                        r_iframe = requests.get(ep_url, allow_redirects=True, headers=http_headers, timeout=30, proxies=proxies)
                                         soup_iframe = BeautifulSoup(r_iframe.text, 'html.parser')
                                         for script_iframe in soup_iframe.find_all('script'):
                                             tree_iframe = CalmParser().parse(script_iframe.text.strip())
@@ -442,13 +469,13 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout):
                             ep_ts_path = ep_ts_path.decode('utf-8')
                             ep_mp4_path = ep_mp4_path.decode('utf-8')
 
-                        r = requests.get(ep_url, allow_redirects=True, headers=http_headers, timeout=30)
+                        r = requests.get(ep_url, allow_redirects=True, headers=http_headers, timeout=30, proxies=proxies)
 
                         parsed_ep_uri = urlparse(ep_url)
                         m3u8_host = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_ep_uri)
 
                         # Disable `if` condition line below, if want to test convert .ts without re-download
-                        if m3u8_decryptopr_main(r.text, ep_ts_path, m3u8_host, http_headers):
+                        if m3u8_decryptopr_main(r.text, ep_ts_path, m3u8_host, http_headers, proxies=proxies):
                             remux_ts_to_mp4(ep_ts_path, ep_mp4_path)
 
                         #source_url = "https://tv2.xboku.com/20191126/wNiFeUIj/index.m3u8"
@@ -499,4 +526,4 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout):
     #print(soup)
 
 if __name__ == "__main__":
-    main(args.dir, args.file, args.from_ep, args.to_ep, args.url, sys.stdout)
+    main(args.dir, args.file, args.from_ep, args.to_ep, args.url, sys.stdout, args.proxy)

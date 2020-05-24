@@ -41,21 +41,22 @@ def decrypt(data, key, iv):
     return decryptor.decrypt(data)
 
 
-def get_req(url):
+def get_req(url, proxies={}):
     """Get binary data from URL"""
 
     #data = ''
     #or chunk in requests.get(url, headers={'User-agent': 'Mozilla/5.0'}, stream=True):
     #    data += chunk
 
-    return requests.get(url, headers={'User-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.100 Safari/537.3'}, stream=True).content
+    return requests.get(url, headers={'User-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.100 Safari/537.3'}, stream=True, proxies=proxies).content
+    #return requests.get(url, headers={'User-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.100 Safari/537.3'}, stream=False, proxies=proxies).content #tested 1 proxy not able use stream=False
     #if r.status_code == 200:
     #    #r.raw.decode_content = True
     #    #return r.raw
     #    return r
     #return None
 
-def main(m3u8_data, ts_path, m3u8_host, http_headers, skip_ad=True):
+def main(m3u8_data, ts_path, m3u8_host, http_headers, skip_ad=True, proxies={}):
 
     '''
     #testing:
@@ -105,7 +106,7 @@ def main(m3u8_data, ts_path, m3u8_host, http_headers, skip_ad=True):
                     real_m3u8_url = ''.join([m3u8_host, real_m3u8_url_path])
                 print(('real m3u8 url: ' + repr(real_m3u8_url)))
                 real_m3u8_data = requests.get(real_m3u8_url, allow_redirects=True,
-                                    headers=http_headers, timeout=30).text
+                                    headers=http_headers, timeout=30, proxies=proxies).text
             except Exception:
                 print((traceback.format_exc()))
             else:
@@ -137,14 +138,14 @@ def main(m3u8_data, ts_path, m3u8_host, http_headers, skip_ad=True):
             print('Decrypt ts Failed :(')
             return
         key_url = chunks[0]
-        key = get_req(key_url)
+        key = get_req(key_url, proxies=proxies)
         iv = key
         chunks = re.findall(r'https?://.*ts', sub_data)
         #chunks = chunks[1:]
     else:
         chunks = chunks[0]
         key_url = chunks[0]
-        key = get_req(key_url)
+        key = get_req(key_url, proxies=proxies)
         iv = chunks[1][2:]
         #iv = iv.decode('hex')
         chunks = re.findall(r'https?://.*ts', sub_data)
@@ -164,7 +165,7 @@ def main(m3u8_data, ts_path, m3u8_host, http_headers, skip_ad=True):
 
         file_name = os.path.basename(ts_url).split('?')[0]
         
-        enc_ts = get_req(ts_url)
+        enc_ts = get_req(ts_url, proxies=proxies)
 
         #print(enc_ts)
         #print(dir(enc_ts))

@@ -9,8 +9,9 @@ Windows-64 bit 用户可以下载 "独播库下载器_win_64_exe.zip", 解压缩
 #### 命令行界面:
 请自行参考 `python duboku_console.py --help`。
 
-例子1: python3 duboku_console.py https://www.fanstui.com/vodplay/300-1-46.html -d 庆余年/ --from-ep 1 -to-ep 5  
-例子2: python3 duboku_console.py https://www.duboku.net/voddetail-1152.html -f 返校  
+例子1: python3 duboku_console.py https://www.duboku.net/vodplay/1324-1-11.html -d 冰糖炖雪梨/ --from-ep 1 -to-ep 5  
+例子2: python3 duboku_console.py https://www.duboku.net/voddetail/1152.html -f 返校  
+例子3: python3 duboku_console.py https://www.duboku.net/voddetail/1152.html -f 返校 --proxy http://127.0.0.1:22
 
 #### 注意事项:
 
