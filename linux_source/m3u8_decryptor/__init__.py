@@ -56,7 +56,7 @@ def get_req(url, proxies={}):
     #    return r
     #return None
 
-def main(m3u8_data, ts_path, m3u8_host, http_headers, skip_ad=True, proxies={}):
+def main(m3u8_data, ts_path, m3u8_host, http_headers, arg_debug, debug_path, skip_ad=True, proxies={}):
 
     '''
     #testing:
@@ -105,8 +105,18 @@ def main(m3u8_data, ts_path, m3u8_host, http_headers, skip_ad=True, proxies={}):
                         real_m3u8_url_path = real_m3u8_url_path[1:]
                     real_m3u8_url = ''.join([m3u8_host, real_m3u8_url_path])
                 print(('real m3u8 url: ' + repr(real_m3u8_url)))
+
+                if arg_debug:
+                    with open(debug_path, 'a') as f:
+                        f.write('\n\nM3U8 URL: ' + real_m3u8_url + '\n\n')
+
                 real_m3u8_data = requests.get(real_m3u8_url, allow_redirects=True,
                                     headers=http_headers, timeout=30, proxies=proxies).text
+
+                if arg_debug:
+                    with open(debug_path, 'a') as f:
+                        f.write(real_m3u8_data)
+
             except Exception:
                 print((traceback.format_exc()))
             else:

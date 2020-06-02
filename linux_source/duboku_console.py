@@ -114,10 +114,11 @@ arg_parser.add_argument('-from-ep', '--from-ep', dest='from_ep', default=1, type
 arg_parser.add_argument('-to-ep', '--to-ep', dest='to_ep',
                         type=int, help='Specify the to episodes.')
 arg_parser.add_argument('-p', '--proxy', help='Specify proxy of https')
+arg_parser.add_argument('-g', '--debug', action='store_true', help='Save html source to duboku_epN.log. So you can attach this file when open issue in https://github.com/limkokhole/duboku-downloader/issues')
 arg_parser.add_argument('url', nargs='?', help='Specify cinema url.')
 args, remaining = arg_parser.parse_known_args()
 
-def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_proxy=None):
+def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_debug, arg_proxy=None):
 
     try:
         sys.stdout = custom_stdout
@@ -350,7 +351,17 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
             else:
                 print('[当前第{}集] 尝试 URL: {}'.format(ep, url) )
             try:
+
+                if arg_debug:
+                    with open('duboku_ep' + str(ep) + '.log', 'w') as f:
+                        f.write('URL: ' + url + '\n\n')
+
                 r = requests.get(url, allow_redirects=True, headers=http_headers, timeout=30, proxies=proxies)
+
+                if arg_debug:
+                    with open('duboku_ep' + str(ep) + '.log', 'a') as f:
+                        f.write(r.text)
+
             except requests.exceptions.ProxyError as pe:
                 print('[😞] 代理错误。请检查您的代理。确保有端口号(port number)， 例如端口1234: http://127.0.0.1:1234\n')
                 print(traceback.format_exc())
@@ -403,7 +414,17 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                                             
                                     else: #single video normally came here
                                         #print('NEW url type? ' + repr(ep_url))
+
+                                        if arg_debug:
+                                            with open('duboku_ep' + str(ep) + '.log', 'a') as f:
+                                                f.write('\n\nEP URL: ' + ep_url + '\n\n')
+
                                         r_iframe = requests.get(ep_url, allow_redirects=True, headers=http_headers, timeout=30, proxies=proxies)
+
+                                        if arg_debug:
+                                            with open('duboku_ep' + str(ep) + '.log', 'a') as f:
+                                                f.write(r_iframe.text)
+
                                         soup_iframe = BeautifulSoup(r_iframe.text, 'html.parser')
                                         for script_iframe in soup_iframe.find_all('script'):
                                             tree_iframe = CalmParser().parse(script_iframe.text.strip())
@@ -469,13 +490,23 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                             ep_ts_path = ep_ts_path.decode('utf-8')
                             ep_mp4_path = ep_mp4_path.decode('utf-8')
 
+                        if arg_debug:
+                            with open('duboku_ep' + str(ep) + '.log', 'a') as f:
+                                f.write('\n\n下载的 url: ' + ep_url)
+                                f.write('\n下载的 ts 路径: ' + ep_ts_path)
+                                f.write('\n下载的 mp4 路径: ' + ep_mp4_path + '\n\n')
+
                         r = requests.get(ep_url, allow_redirects=True, headers=http_headers, timeout=30, proxies=proxies)
+
+                        if arg_debug:
+                            with open('duboku_ep' + str(ep) + '.log', 'a') as f:
+                                f.write('r: ' + r.text)
 
                         parsed_ep_uri = urlparse(ep_url)
                         m3u8_host = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_ep_uri)
 
                         # Disable `if` condition line below, if want to test convert .ts without re-download
-                        if m3u8_decryptopr_main(r.text, ep_ts_path, m3u8_host, http_headers, proxies=proxies):
+                        if m3u8_decryptopr_main(r.text, ep_ts_path, m3u8_host, http_headers, arg_debug, 'duboku_ep' + str(ep) + '.log', proxies=proxies):
                             remux_ts_to_mp4(ep_ts_path, ep_mp4_path)
 
                         #source_url = "https://tv2.xboku.com/20191126/wNiFeUIj/index.m3u8"
@@ -526,4 +557,4 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
     #print(soup)
 
 if __name__ == "__main__":
-    main(args.dir, args.file, args.from_ep, args.to_ep, args.url, sys.stdout, args.proxy)
+    main(args.dir, args.file, args.from_ep, args.to_ep, args.url, sys.stdout, args.debug, args.proxy)

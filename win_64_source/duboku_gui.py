@@ -348,10 +348,10 @@ class Widget(QWidget):
 
         if self.radioButtonMov.isChecked():
             self.pool.apply_async(duboku_console.main, args=(None, dest_full_path,
-                    self.fromEpSpinBox.value(), self.toEpSpinBox.value(), self.url.text(), LoggerWriterOtherProcess(), self.proxy.text()), callback=self.task_done)
+                    self.fromEpSpinBox.value(), self.toEpSpinBox.value(), self.url.text(), LoggerWriterOtherProcess(), False, self.proxy.text()), callback=self.task_done)
         else:
             self.pool.apply_async(duboku_console.main, args=(dest_full_path, None,
-                    self.fromEpSpinBox.value(), self.toEpSpinBox.value(), self.url.text(), LoggerWriterOtherProcess(), self.proxy.text()), callback=self.task_done)
+                    self.fromEpSpinBox.value(), self.toEpSpinBox.value(), self.url.text(), LoggerWriterOtherProcess(), False, self.proxy.text()), callback=self.task_done)
 
 
 class MainWindow(QMainWindow):
