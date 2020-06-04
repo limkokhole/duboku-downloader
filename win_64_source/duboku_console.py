@@ -75,7 +75,7 @@ UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like 
 BOLD_ONLY = ['bold']
 
 # https://github.com/limkokhole/calmjs.parse
-import calmjs
+#import calmjs
 from calmjs.parse import es5
 # ~/.local/lib/python3.6/site-packages/calmjs/parse/walkers.py
 from calmjs.parse.asttypes import Assign as CalmAssign
