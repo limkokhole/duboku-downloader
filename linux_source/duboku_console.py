@@ -66,7 +66,7 @@ else:
 #user_agent_rotator = UserAgent(software_names=software_names, operating_systems=operating_systems, limit=100)
 # Get Random User Agent String.
 #UA = user_agent_rotator.get_random_user_agent()
-UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36'
+UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36'
 
 #from termcolor import cprint
 #import colorama
@@ -75,7 +75,7 @@ UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like 
 BOLD_ONLY = ['bold']
 
 # https://github.com/limkokhole/calmjs.parse
-#import calmjs
+import calmjs # Used in except calmjs
 from calmjs.parse import es5
 # ~/.local/lib/python3.6/site-packages/calmjs/parse/walkers.py
 from calmjs.parse.asttypes import Assign as CalmAssign
@@ -426,6 +426,7 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                                                 f.write(r_iframe.text)
 
                                         soup_iframe = BeautifulSoup(r_iframe.text, 'html.parser')
+                                        decrypted_final_js = None
                                         for script_iframe in soup_iframe.find_all('script'):
                                             tree_iframe = CalmParser().parse(script_iframe.text.strip())
                                             for decrypt_js in walker.filter(tree_iframe, calm_var):
@@ -442,11 +443,15 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                                                         if decrypt_js_c.__str__() == 'CryptoJS.AES.decrypt':
                                                             #CryptoJS.AES.decrypt
                                                             get_passwd = True
-                                        #print('ct b64 data: ' + ct_b64)
-                                        #print('passwd: ' + passwd)
-                                        decrypted_final_content = crypto_py_aes_main(ct_b64, passwd)
-                                        decrypted_final_js = CalmParser().parse(decrypted_final_content.decode())
-                                        
+                                                elif decrypt_js.identifier.value == 'playlist':
+                                                    decrypted_final_js = tree_iframe
+                                                   
+                                        if ct_b64: 
+                                            #print('ct b64 data: ' + repr(ct_b64))
+                                            #print('passwd: ' + repr(passwd))
+                                            decrypted_final_content = crypto_py_aes_main(ct_b64, passwd)
+                                            decrypted_final_js = CalmParser().parse(decrypted_final_content.decode())
+                                        #else: # No nid decrypt, direct use plain `decrypted_final_js = tree_iframe` above
                                         m3u8_path_incomplete = '' #reset
                                         m3u8_host_incomplete = ''
 

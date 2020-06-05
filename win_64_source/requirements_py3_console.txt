@@ -1,3 +1,4 @@
+calmjs
 calmjs.types
 requests
 pycrypto

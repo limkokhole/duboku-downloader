@@ -90,7 +90,7 @@ def main(m3u8_data, ts_path, m3u8_host, http_headers, arg_debug, debug_path, ski
                 if len(x_r) > 1:
                     m3u8_resolution_d[x_r[1]] = m3u8_lines[ni].strip()
 
-    #print(m3u8_resolution_d)
+    #print('resolution_d: ' + repr(m3u8_resolution_d))
 
     if m3u8_resolution_d:
         real_m3u8_url = ''
@@ -144,12 +144,15 @@ def main(m3u8_data, ts_path, m3u8_host, http_headers, arg_debug, debug_path, ski
     if not chunks:
         chunks = re.findall('#EXT-X-KEY:METHOD=AES-128,URI="(.*)"', sub_data)
         print(('[2] chunks: ' + repr(chunks)))
-        if not chunks:
-            print('Decrypt ts Failed :(')
-            return
-        key_url = chunks[0]
-        key = get_req(key_url, proxies=proxies)
-        iv = key
+        if chunks:
+            key_url = chunks[0]
+            key = get_req(key_url, proxies=proxies)
+            iv = key
+        else:
+            print('No need decrypt.')
+            key_url = None
+            key = None
+            iv = None
         chunks = re.findall(r'https?://.*ts', sub_data)
         #chunks = chunks[1:]
     else:
@@ -194,8 +197,11 @@ def main(m3u8_data, ts_path, m3u8_host, http_headers, arg_debug, debug_path, ski
         try:
             with open(ts_path, file_mode) as f:
                 #with open(ts_path, 'wb') as f:
-                dec_ts = decrypt(enc_ts, key, iv)
-                f.write(dec_ts)
+                if (key is None) and (iv is None):
+                    f.write(enc_ts)
+                else:
+                    dec_ts = decrypt(enc_ts, key, iv)
+                    f.write(dec_ts)
         except PermissionError:
             print((traceback.format_exc()))
             print('请不要一边下载加密的 .ts 视频，一边观看该视频。 请重新下载该集.')
