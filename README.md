@@ -4,12 +4,16 @@
 #### 图形界面:
 Windows-64 bit 用户可以下载 "独播库下载器_win_64_exe.zip", 解压缩后， 双击 "独播库下载器.exe" 文件执行。请确保附件 ffmpeg_minimal_ts_2_mp4.exe 与 "独播库下载器.exe" 在同一个目录。 
 
-命令行爱好者也可以 python duboku_gui.py 打开。python3 用户必须先执行命令 `python3 -m pip install beautifulsoup4==4.7.1` 才能正常使用。Linux 用户请确保已安装了 `ffmpeg`。  
+命令行爱好者也可以 python duboku_gui.py 打开。python3 用户必须先执行命令 `python3 -m pip install beautifulsoup4==4.7.1` 才能正常使用。Linux 用户请确保已安装了 `ffmpeg`。 python 用户的 pip 详细需求可以参考 requirements_py3_gui.txt 以及 requirements_py3_console.txt。
+
+###### 安装 pycrypto 的需求， 例子:
+python 3.6 用户请确保(apt)安装了 gcc, build-essential, python3.6-dev。 
+python 3.8 用户请确保(apt)安装了 gcc, libpython3.8-dev。
 
 #### 命令行界面:
 请自行参考 `python duboku_console.py --help`。  
 
-例子1(电视剧): python3 duboku_console.py https://www.duboku.net/vodplay/1324-1-11.html -d 冰糖炖雪梨/ --from-ep 1 -to-ep 5  
+例子1(连续剧): python3 duboku_console.py https://www.duboku.net/vodplay/1324-1-11.html -d 冰糖炖雪梨/ --from-ep 1 -to-ep 5  
 例子2(电影): python3 duboku_console.py https://www.duboku.net/voddetail/1152.html -f 返校  
 例子3(储存开 issue 需要的 duboku_epN.log): python3 duboku_console.py https://www.duboku.net/voddetail/1152.html -f 返校 --debug   
 例子4(代理): python3 duboku_console.py https://www.duboku.net/voddetail/1152.html -f 返校 --proxy http://127.0.0.1:22

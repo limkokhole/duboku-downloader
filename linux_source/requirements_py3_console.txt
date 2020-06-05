@@ -1,0 +1,4 @@
+calmjs.types==1.0.0
+requests==2.18.4
+pycrypto==2.6.1
+beautifulsoup4==4.7.1
