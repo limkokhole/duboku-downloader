@@ -136,12 +136,13 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
         if not arg_url:
             print('main arg_url: ' + repr(arg_url))
             #quit('[!] [e1] Please specify cinema url in https://www.fanstui.com/voddetail-300.html. Abort.')
-            quit('[!] [e1] 请用该格式  https://www.duboku.net/voddetail-300.html 的链接。')
+            quit('[!] [e1] 请用该格式  https://www.duboku.net/voddetail/300.html 的链接。')
 
         # Should accept these formats:
-        # https://www.fanstui.com/voddetail-300.html
-        # https://www.fanstui.com/vodplay/300-1-1.html
-        # https://www.fanstui.com/vp/529-1-1.html
+        # https://www.duboku.net/voddetail/300.html 
+        # https://www.fanstui.com/voddetail-300.html # Deprecated
+        # https://www.fanstui.com/vodplay/300-1-1.html # Deprecated
+        # https://www.fanstui.com/vp/529-1-1.html # Deprecated
         # https://tv.newsinportal.com/vodplay/1382-1-3.html
         #VODPLAY_PREFIX = 'https://www.fanstui.com/vodplay/'
         NEWS_VODPLAY_PREFIX = 'https://tv.newsinportal.com/vodplay/'
@@ -179,11 +180,11 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                 cinema_url_middle = '-' + arg_url_m.split(VP_PREFIX)[1].split('-')[1] + '-'
             else:
                 #quit('[!] [e2] Please specify cinema url in https://www.fanstui.com/voddetail-300.html. Abort.')
-                quit('[!] [e2] 请用该格式 https://www.dubokut.net/voddetail-300.html 的链接。')
+                quit('[!] [e2] 请用该格式 https://www.dubokut.net/voddetail/300.html 的链接。')
         except ValueError as ve:
             print(ve)
             #quit('[!] [e3] Please specify cinema url in https://www.fanstui.com/voddetail-300.html. Abort.')
-            quit('[!] [e3] 请用该格式  https://www.duboku.net/voddetail-300.html 的链接。')
+            quit('[!] [e3] 请用该格式  https://www.duboku.net/voddetail/300.html 的链接。')
 
 
         if arg_file:
