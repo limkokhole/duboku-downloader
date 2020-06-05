@@ -48,8 +48,8 @@ def get_req(url, proxies={}):
     #or chunk in requests.get(url, headers={'User-agent': 'Mozilla/5.0'}, stream=True):
     #    data += chunk
 
-    return requests.get(url, headers={'User-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36'}, stream=True, proxies=proxies).content
-    #return requests.get(url, headers={'User-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.100 Safari/537.3'}, stream=False, proxies=proxies).content #tested 1 proxy not able use stream=False
+    return requests.get(url, headers={'User-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.0.0 Safari/537.36'}, stream=True, proxies=proxies).content
+    #return requests.get(url, headers={'User-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.0.0 Safari/537.36'}, stream=False, proxies=proxies).content #tested 1 proxy not able use stream=False
     #if r.status_code == 200:
     #    #r.raw.decode_content = True
     #    #return r.raw

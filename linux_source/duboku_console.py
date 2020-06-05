@@ -56,18 +56,8 @@ else:
 #try: from urllib.request import urlopen #python3
 #except ImportError: from urllib2 import urlopen #python2
 
-#https://github.com/limkokhole/random_user_agent
-#from random_user_agent.user_agent import UserAgent
-#from random_user_agent.params import SoftwareName, OperatingSystem
-# you can also import SoftwareEngine, HardwareType, SoftwareType, Popularity from random_user_agent.params
-# you can also set number of user agents required by providing `limit` as parameter
-#software_names = [SoftwareName.CHROME.value]
-#operating_systems = [OperatingSystem.WINDOWS.value, OperatingSystem.LINUX.value]   
-#user_agent_rotator = UserAgent(software_names=software_names, operating_systems=operating_systems, limit=100)
-# Get Random User Agent String.
-#UA = user_agent_rotator.get_random_user_agent()
-UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36'
-
+# RIP UA, https://groups.google.com/a/chromium.org/forum/m/#!msg/blink-dev/-2JIRNMWJ7s/yHe4tQNLCgAJ
+UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.0.0 Safari/537.36'
 #from termcolor import cprint
 #import colorama
 #from colorama import Style, Fore, Back
