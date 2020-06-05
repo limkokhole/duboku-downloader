@@ -32,7 +32,7 @@ import os
 import re
 import requests
 import sys, traceback
-from Crypto.Cipher import AES
+from Cryptodome.Cipher import AES
 
 
 def decrypt(data, key, iv):

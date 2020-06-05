@@ -1,8 +1,8 @@
 
 #Credit: Artjom B. at https://stackoverflow.com/a/36780727/1074998
 
-from Crypto import Random
-from Crypto.Cipher import AES
+from Cryptodome import Random
+from Cryptodome.Cipher import AES
 import base64
 from hashlib import md5
 

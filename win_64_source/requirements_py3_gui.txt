@@ -1,6 +1,6 @@
 calmjs
 calmjs.types
 requests
-pycrypto
+pycryptodomex
 PySide2
 beautifulsoup4==4.7.1
