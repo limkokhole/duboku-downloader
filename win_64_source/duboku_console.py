@@ -180,7 +180,7 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                 cinema_url_middle = '-' + arg_url_m.split(VP_PREFIX)[1].split('-')[1] + '-'
             else:
                 #quit('[!] [e2] Please specify cinema url in https://www.fanstui.com/voddetail-300.html. Abort.')
-                quit('[!] [e2] 请用该格式 https://www.dubokut.net/voddetail/300.html 的链接。')
+                quit('[!] [e2] 请用该格式 https://www.duboku.net/voddetail/300.html 的链接。')
         except ValueError as ve:
             print(ve)
             #quit('[!] [e3] Please specify cinema url in https://www.fanstui.com/voddetail-300.html. Abort.')
