@@ -75,7 +75,7 @@ UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like 
 BOLD_ONLY = ['bold']
 
 # https://github.com/limkokhole/calmjs.parse
-import calmjs # Used in except calmjs
+import calmjs # Used in `except calmjs...:`
 from calmjs.parse import es5
 # ~/.local/lib/python3.6/site-packages/calmjs/parse/walkers.py
 from calmjs.parse.asttypes import Assign as CalmAssign
@@ -90,7 +90,7 @@ from crypto_py_aes import main as crypto_py_aes_main
 import argparse
 from argparse import RawTextHelpFormatter
 arg_parser = argparse.ArgumentParser(
-    description='Duboku Downloader', formatter_class=RawTextHelpFormatter)
+    description='独播库下载器', formatter_class=RawTextHelpFormatter)
 
 def quit(msgs, exit=True):
     if not isinstance(msgs, list):
@@ -103,19 +103,19 @@ def quit(msgs, exit=True):
             print(msg)
     if exit:
         #cprint('Abort.', 'white', 'on_red', attrs=BOLD_ONLY)
-        print('Abort.')
+        print('中文。')
         sys.exit()
 
 #arg_parser.add_argument('-t', '--video-type', dest='video_type', action='store_true', help='Specify movie instead of cinemae')
-arg_parser.add_argument('-d', '--dir', help='Directory name (not path) to save the cinema/series.')
-arg_parser.add_argument('-f', '--file', help='File name to save single movie (Do not postfix with .mp4).')
+arg_parser.add_argument('-d', '--dir', help='用来储存连续剧/综艺的目录名 (非路径)。')
+arg_parser.add_argument('-f', '--file', help='用来储存电影的文件名。请别加后缀 .mp4。')
 #from/to options should grey out if -f selected:
-arg_parser.add_argument('-from-ep', '--from-ep', dest='from_ep', default=1, type=int, help='Specify the from episodes.')
+arg_parser.add_argument('-from-ep', '--from-ep', dest='from_ep', default=1, type=int, help='从第几集开始下载。')
 arg_parser.add_argument('-to-ep', '--to-ep', dest='to_ep',
-                        type=int, help='Specify the to episodes.')
-arg_parser.add_argument('-p', '--proxy', help='Specify proxy of https')
-arg_parser.add_argument('-g', '--debug', action='store_true', help='Save html source to duboku_epN.log. So you can attach this file when open issue in https://github.com/limkokhole/duboku-downloader/issues')
-arg_parser.add_argument('url', nargs='?', help='Specify cinema url.')
+                        type=int, help='从第几集停止下载。')
+arg_parser.add_argument('-p', '--proxy', help='https 代理(如有)')
+arg_parser.add_argument('-g', '--debug', action='store_true', help='储存 duboku_epN.log 日志附件， 然后你可以在 https://github.com/limkokhole/duboku-downloader/issues 报告无法下载的问题。')
+arg_parser.add_argument('url', nargs='?', help='下载链接。')
 args, remaining = arg_parser.parse_known_args()
 
 def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_debug, arg_proxy=None):
@@ -136,13 +136,15 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
         if not arg_url:
             print('main arg_url: ' + repr(arg_url))
             #quit('[!] [e1] Please specify cinema url in https://www.fanstui.com/voddetail-300.html. Abort.')
-            quit('[!] [e1] Please specify cinema url in https://www.duboku.net/voddetail-300.html. Abort.')
+            quit('[!] [e1] 请用该格式  https://www.duboku.net/voddetail-300.html 的链接。')
 
         # Should accept these formats:
         # https://www.fanstui.com/voddetail-300.html
         # https://www.fanstui.com/vodplay/300-1-1.html
         # https://www.fanstui.com/vp/529-1-1.html
+        # https://tv.newsinportal.com/vodplay/1382-1-3.html
         #VODPLAY_PREFIX = 'https://www.fanstui.com/vodplay/'
+        NEWS_VODPLAY_PREFIX = 'https://tv.newsinportal.com/vodplay/'
         VODPLAY_PREFIX = 'https://www.duboku.net/vodplay/'
         VODDETAIL_PREFIX = 'https://www.duboku.net/voddetail/'
         #VP_PREFIX = 'https://www.fanstui.com/vp/'
@@ -159,6 +161,10 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                 cinema_id = int(arg_url_m.split('https://www.duboku.net/voddetail-')[1].split('.html')[0])
                 cinema_id = str(cinema_id) #set back str after test int() ValueError
                 cinema_url_middle = '-1-'
+            elif arg_url_m.startswith(NEWS_VODPLAY_PREFIX):
+                cinema_id = int(arg_url_m.split(NEWS_VODPLAY_PREFIX)[1].split('-')[0])
+                cinema_id = str(cinema_id)
+                cinema_url_middle = '-' + arg_url_m.split(NEWS_VODPLAY_PREFIX)[1].split('-')[1] + '-'
             elif arg_url_m.startswith(VODPLAY_PREFIX):
                 cinema_id = int(arg_url_m.split(VODPLAY_PREFIX)[1].split('-')[0])
                 cinema_id = str(cinema_id)
@@ -173,34 +179,36 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                 cinema_url_middle = '-' + arg_url_m.split(VP_PREFIX)[1].split('-')[1] + '-'
             else:
                 #quit('[!] [e2] Please specify cinema url in https://www.fanstui.com/voddetail-300.html. Abort.')
-                quit('[!] [e2] Please specify cinema url in https://www.dubokut.net/voddetail-300.html. Abort.')
+                quit('[!] [e2] 请用该格式 https://www.dubokut.net/voddetail-300.html 的链接。')
         except ValueError as ve:
             print(ve)
             #quit('[!] [e3] Please specify cinema url in https://www.fanstui.com/voddetail-300.html. Abort.')
-            quit('[!] [e3] Please specify cinema url in https://www.duboku.net/voddetail-300.html. Abort.')
+            quit('[!] [e3] 请用该格式  https://www.duboku.net/voddetail-300.html 的链接。')
 
 
         if arg_file:
             if arg_dir:
-                quit('[!] Please do not pass both -d and -f.')
+                quit('[!] 不能同时使用 -d 和 -f 选项。')
                 
             ep_ts_path = os.path.abspath(arg_file + '.ts')
             ep_mp4_path = os.path.abspath(arg_file + '.mp4')
             arg_to_ep = 2
         else:
             if not arg_to_ep:
-                quit('[!] Please specify download up to N episodes with `--to-ep N`. Abort.')
+                quit('[!] 请用 `--to-ep N` 选项决定从第 N 集停止下集。')
+            if arg_from_ep > arg_to_ep:
+                quit('[!] 从第几集必须小于或等于到第几集。')
             arg_to_ep+=1
 
             if not arg_dir:
-                quit('[!] Please specify directory path to save cinema with `-d DIR`. Abort.')
+                quit('[!] 请用 `-d 目录名` 选项。')
 
             dir_path_m = os.path.abspath(arg_dir)
             if not os.path.isdir(dir_path_m):
                 try:
                     os.makedirs(dir_path_m)
                 except OSError:
-                    quit('[i] Failed to make directory. Maybe it is a file? Abort.')
+                    quit('[i] 无法创建目录。或许已有同名文件？ ')
 
         # https://stackoverflow.com/questions/10606133/sending-user-agent-using-requests-library-in-python
         http_headers = {
@@ -546,8 +554,6 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
 
 
     print('[😄] 全部下载工作完毕。您已可以关闭窗口, 或下载别的视频。')
-
-    #第41集
 
     '''
     #slimit, https://stackoverflow.com/questions/44503833/python-slimit-minimizer-unwanted-warning-output
