@@ -85,15 +85,16 @@ arg_parser = argparse.ArgumentParser(
 def quit(msgs, exit=True):
     if not isinstance(msgs, list):
         msgs = [msgs]
+    if exit: #避免只看见最后一行“中止。”而不懂必须滚上查看真正错误原因。
+        msgs[-1]+= '中止。'
     for msg in msgs:
         if msg == '\n': # Empty line without bg color
-            print('\n')
+            pass #print('\n')
         else:
             #cprint(msg, 'white', 'on_red', attrs=BOLD_ONLY)
             print(msg)
     if exit:
         #cprint('Abort.', 'white', 'on_red', attrs=BOLD_ONLY)
-        print('中文。')
         sys.exit()
 
 #arg_parser.add_argument('-t', '--video-type', dest='video_type', action='store_true', help='Specify movie instead of cinemae')
@@ -144,7 +145,7 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
         cinema_url_post = '.html'
         #cinema_url_pre = 'https://www.fanstui.com/vodplay/'
         cinema_url_pre = 'https://www.duboku.net/vodplay/'
-        arg_url_m = arg_url #.replace('https://www.duboku.net/', 'https://www.fanstui.com/')
+        arg_url_m = arg_url.strip() #.replace('https://www.duboku.net/', 'https://www.fanstui.com/')
         try:
             #if arg_url_m.startswith('https://www.fanstui.com/voddetail-'):
             if arg_url_m.startswith('https://www.duboku.net/voddetail-'):

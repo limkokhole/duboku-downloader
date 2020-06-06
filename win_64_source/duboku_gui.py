@@ -279,7 +279,7 @@ class Widget(QWidget):
     @Slot()
     def check_disable_download(self, s):
 
-        if self.url.text() and self.browse_folder_value and self.folder_or_filename.text():
+        if self.url.text().strip() and self.browse_folder_value and self.folder_or_filename.text():
             self.add.setEnabled(True)
         else:
             self.add.setEnabled(False)
@@ -348,10 +348,10 @@ class Widget(QWidget):
 
         if self.radioButtonMov.isChecked():
             self.pool.apply_async(duboku_console.main, args=(None, dest_full_path,
-                    self.fromEpSpinBox.value(), self.toEpSpinBox.value(), self.url.text(), LoggerWriterOtherProcess(), False, self.proxy.text()), callback=self.task_done)
+                    self.fromEpSpinBox.value(), self.toEpSpinBox.value(), self.url.text().strip(), LoggerWriterOtherProcess(), False, self.proxy.text()), callback=self.task_done)
         else:
             self.pool.apply_async(duboku_console.main, args=(dest_full_path, None,
-                    self.fromEpSpinBox.value(), self.toEpSpinBox.value(), self.url.text(), LoggerWriterOtherProcess(), False, self.proxy.text()), callback=self.task_done)
+                    self.fromEpSpinBox.value(), self.toEpSpinBox.value(), self.url.text().strip(), LoggerWriterOtherProcess(), False, self.proxy.text()), callback=self.task_done)
 
 
 class MainWindow(QMainWindow):
