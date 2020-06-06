@@ -4,11 +4,7 @@
 #### 图形界面:
 Windows-64 bit 用户可以下载 "独播库下载器_win_64_exe.zip", 解压缩后， 双击 "独播库下载器.exe" 文件执行。请确保附件 ffmpeg_minimal_ts_2_mp4.exe 与 "独播库下载器.exe" 在同一个目录。 
 
-命令行爱好者也可以 python duboku_gui.py 打开。python3 用户必须先执行命令 `python3 -m pip install beautifulsoup4==4.7.1` 才能正常使用。Linux 用户请确保已安装了 `ffmpeg`。 python 用户的 `pip` 详细需求可以参考 requirements_py3_gui.txt 以及 requirements_py3_console.txt。
-
-###### pip 安装 pycrypto 的需求， 例子:
-python 3.6 用户请确保(apt)安装了 gcc, build-essential, python3.6-dev。  
-python 3.8 用户请确保(apt)安装了 gcc, libpython3.8-dev。  
+命令行爱好者也可以 python duboku_gui.py 打开。python3 用户必须先执行命令 `python3 -m pip install beautifulsoup4==4.7.1` 才能正常使用。Linux 用户请确保已安装了 `ffmpeg`。 python 用户的 `pip` 详细需求可以参考 requirements_py3_gui.txt 以及 requirements_py3_console.txt 文件。
 
 #### 命令行界面:
 请自行参考 `python duboku_console.py --help`。  
