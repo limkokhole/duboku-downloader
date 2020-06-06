@@ -14,7 +14,9 @@ Windows (64-bit) 用户，只需要下载 "独播库下载器_win_64_exe.zip", �
 
 python3 用户必须先执行命令 `python3 -m pip install beautifulsoup4==4.7.1` 才能正常使用。 其余 `pip` 的依赖请参考 requirements_py3_gui.txt(图形界面) 或 requirements_py3_console.txt(命令行) 文件。
 
-Linux 用户请确保安装了 `ffmpeg` 命令。 Windows 用户如果不想使用我编译的 ffmpeg_minimal_ts_2_mp4.exe， 只需修改 `duboku_gui.py` 的 `'./ffmpeg_minimal_ts_2_mp4'` 去你的 ffmpeg 路径， 抑或自行下载 ffmpeg 后命名成 fmpeg_minimal_ts_2_mp4 替代。
+Linux 用户请确保安装了 `ffmpeg` 命令。 
+
+Windows 用户如果不想使用我编译的 ffmpeg_minimal_ts_2_mp4.exe， 只需修改 `duboku_gui.py` 的 `'./ffmpeg_minimal_ts_2_mp4'` 去你的 ffmpeg 路径， 抑或自行下载 ffmpeg 后命名成 fmpeg_minimal_ts_2_mp4 替代。
 
 ###### 命令行界面的用法:
 请自行参考 `python duboku_console.py --help`。
