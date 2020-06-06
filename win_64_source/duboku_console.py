@@ -89,7 +89,7 @@ def quit(msgs, exit=True):
         msgs[-1]+= '中止。'
     for msg in msgs:
         if msg == '\n': # Empty line without bg color
-            pass #print('\n')
+            print('\n')
         else:
             #cprint(msg, 'white', 'on_red', attrs=BOLD_ONLY)
             print(msg)
