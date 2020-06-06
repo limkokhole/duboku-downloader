@@ -21,10 +21,13 @@ Windows 用户如果不想使用我编译的 ffmpeg_minimal_ts_2_mp4.exe， 只�
 ###### 命令行界面的用法:
 请自行参考 `python duboku_console.py --help`。
 
-例子1(连续剧): python3 duboku_console.py https://tv.newsinportal.com/vodplay/1324-1-11.html -d 冰糖炖雪梨/ --from-ep 1 -to-ep 5  
-例子2(电影): python3 duboku_console.py https://www.duboku.net/voddetail/1152.html -f 返校  
-例子3(储存开 issue 需要的 duboku_epN.log): python3 duboku_console.py https://www.duboku.net/voddetail/1152.html -f 返校 --debug   
-例子4(代理): python3 duboku_console.py https://www.duboku.net/voddetail/1152.html -f 返校 --proxy http://127.0.0.1:22
+例子1(连续剧): `python3 duboku_console.py https://tv.newsinportal.com/vodplay/1324-1-11.html -d 冰糖炖雪梨/ --from-ep 1 -to-ep 5`    
+
+例子2(电影): `python3 duboku_console.py https://www.duboku.net/voddetail/1152.html -f 返校`  
+
+例子3(储存开 issue 需要的 duboku_epN.log 日志): `python3 duboku_console.py https://www.duboku.net/voddetail/1152.html -f 返校 --debug`   
+
+例子4(代理): `python3 duboku_console.py https://www.duboku.net/voddetail/1152.html -f 返校 --proxy http://127.0.0.1:22`
 
 ---
 ### 注意事项:
