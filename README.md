@@ -19,7 +19,7 @@ Linux 用户请确保安装了 `ffmpeg` 命令。
 Windows 用户如果不想使用我编译的 ffmpeg_minimal_ts_2_mp4.exe， 只需修改 `duboku_gui.py` 的 `'./ffmpeg_minimal_ts_2_mp4'` 去你的 ffmpeg 路径， 抑或自行下载 ffmpeg 后命名成 fmpeg_minimal_ts_2_mp4 替代。
 
 ###### 命令行界面的用法:
-请自行参考 `python duboku_console.py --help`。
+请自行参考 `python3 duboku_console.py --help`。
 
 例子1(连续剧): `python3 duboku_console.py https://tv.newsinportal.com/vodplay/1324-1-11.html -d 冰糖炖雪梨/ --from-ep 1 -to-ep 5`    
 
