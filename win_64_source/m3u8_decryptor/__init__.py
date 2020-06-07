@@ -34,10 +34,11 @@ import requests
 import sys, traceback
 from Cryptodome.Cipher import AES
 
-
 def decrypt(data, key, iv):
     """Decrypt using AES CBC"""
     decryptor = AES.new(key, AES.MODE_CBC, IV=iv)
+    # if ValueError AND has correct padding, https://github.com/Legrandin/pycryptodome/issues/10#issuecomment-354960150
+    #return unpad(decryptor.decrypt(data), 16) # BLOCK_SIZE 16 refer crypto_py_aes.py
     return decryptor.decrypt(data)
 
 
@@ -200,11 +201,14 @@ def main(m3u8_data, ts_path, m3u8_host, http_headers, arg_debug, debug_path, ski
                 if (key is None) and (iv is None):
                     f.write(enc_ts)
                 else:
-                    dec_ts = decrypt(enc_ts, key, iv)
-                    f.write(dec_ts)
+                    try:
+                        dec_ts = decrypt(enc_ts, key, iv)
+                        f.write(dec_ts)
+                    except ValueError:
+                        print('[-] 抛弃不满足 16 倍数解密的此段。') # hang and 声音位移
         except PermissionError:
             print((traceback.format_exc()))
-            print('请不要一边下载加密的 .ts 视频，一边观看该视频。 请重新下载该集.')
+            print('请不要一边下载加密的 .ts 视频，一边观看该视频。 请重新下载该集。')
 
         ''' [onhold:0] How to know ts file size without download ???
         #with open(ts_path + str(ts_i+1), 'ab') as f:
