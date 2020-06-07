@@ -371,6 +371,8 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
             ct_b64 = '' #reset
             passwd = '' #reset
 
+            printed_err = False
+            got_ep_url = False
             for script in soup.find_all('script'):
                 #print(script)
                 try:
@@ -395,7 +397,6 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
 
                     #for w in walker.filter(tree, assignment):
                     #    print(w)
-
                     ep_url = '' #reset
                     for w in walker.filter(tree, calm_id):
                         if w.value == 'player_data':
@@ -406,7 +407,11 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
 
                                     #episode not exists
                                     if not ep_url.strip():
-                                        print('[!] 不存在第{}集。'.format(ep))
+
+                                        if not printed_err:
+                                            print('[!] 不存在第{}集。'.format(ep))
+                                        printed_err = True
+
                                         continue
 
                                     if rv.endswith('.m3u8"') or rv.endswith(".m3u8'"): #[todo:0] need check ' also ?
@@ -487,6 +492,7 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                             break
 
                     if ep_url:
+                        got_ep_url = True
                         #print('hole success')
                         print('下载的 url: ' + ep_url)
                         print('下载的 ts 路径: ' + ep_ts_path)
@@ -526,9 +532,7 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                         #        'Possible reason is filename too long. Please retry with -s <maximum filename size>.')
                         #    sys.exit()
 
-                    #else:
-                    #    print('hole failed :(')
-
+                        break
                     #print(walker.extract(tree, assignment))
 
                     #print('######## END')
@@ -540,6 +544,13 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                     #Need to catch & print exception explicitly to pass to duboku_gui to show err log
                     print('[😞]')
                     print(traceback.format_exc())
+
+            if not got_ep_url:
+                if not printed_err:
+                    if arg_file:
+                        print('[!] 不存在该部影片。')
+                    else:
+                        print('[!] 不存在第{}集。'.format(ep))
 
     except Exception:
         print(traceback.format_exc())
