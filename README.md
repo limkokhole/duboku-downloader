@@ -5,7 +5,7 @@
 ### 普通用户:
 Windows (64-bit) 用户，只需要下载 "独播库下载器_win_64_exe.zip", 解压缩后， 双击 "独播库下载器.exe" 文件执行。请确保附件 ffmpeg_minimal_ts_2_mp4.exe 与 "独播库下载器.exe" 在同一个目录。 
 
-如果出现问题可以[来这点击 New issue 报告。] (https://github.com/limkokhole/duboku-downloader/issues)  
+如果出现问题可以[来这点击 New issue 报告。](https://github.com/limkokhole/duboku-downloader/issues)  
 
 ---
 ### python 用户:
