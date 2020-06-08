@@ -233,7 +233,9 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
         def remux_ts_to_mp4(ts_path, mp4_path):
 
             print( '[...] 转换 .ts ({}) 去 .mp4 ({})'.format(ts_path, mp4_path) )
-            args = ['ffmpeg', '-y', '-i', ts_path, '-c', 'copy', mp4_path]
+            # -v verbose can see -bsf:a aac_adtstoasc already auto added
+            # no nid -crf 0(loseless)-51(blur) if -c copy
+            args = ['ffmpeg', '-v', 'verbose', '-y', '-i', ts_path, '-c', 'copy', mp4_path]
             try:
                 # Don't put shell=True to not popup new console a while when invoke ffmpeg each time
                 #,  bcoz it's will silently failed with .ts get removed

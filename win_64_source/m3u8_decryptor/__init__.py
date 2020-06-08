@@ -33,15 +33,18 @@ import re
 import requests
 import sys, traceback
 from Cryptodome.Cipher import AES
+from Cryptodome.Util.Padding import pad
 
-def decrypt(data, key, iv):
+
+def decrypt(data, key, iv, guest_padding_size):
     """Decrypt using AES CBC"""
     decryptor = AES.new(key, AES.MODE_CBC, IV=iv)
     # if ValueError AND has correct padding, https://github.com/Legrandin/pycryptodome/issues/10#issuecomment-354960150
-    #return unpad(decryptor.decrypt(data), 16) # BLOCK_SIZE 16 refer crypto_py_aes.py
-    return decryptor.decrypt(data)
-
-
+    if guest_padding_size == 0: # can use as flag bcoz pad with 0 will throws modulo by zero err
+        return decryptor.decrypt(data)
+    else:
+        return decryptor.decrypt(pad(data, guest_padding_size)) # You want pad to fill AND before decrypt, not unpad AND after decrypt. hexdump to view its last line not 16-bytes and need fill
+    
 def get_req(url, proxies={}):
     """Get binary data from URL"""
 
@@ -56,6 +59,7 @@ def get_req(url, proxies={}):
     #    #return r.raw
     #    return r
     #return None
+
 
 def main(m3u8_data, ts_path, m3u8_host, http_headers, arg_debug, debug_path, skip_ad=True, proxies={}):
 
@@ -171,12 +175,15 @@ def main(m3u8_data, ts_path, m3u8_host, http_headers, arg_debug, debug_path, ski
     print(('iv: ' + repr(iv)))
     #print(('chunks: ' + repr(chunks)))
 
+    skip_next_chunk = False
     total_chunks = len(chunks)
-
     for ts_i, ts_url in enumerate(chunks):
 
         print('[{}/{}] 处理中 {}'.format( (ts_i+1), total_chunks, ts_url) )
-
+        if skip_next_chunk:
+            skip_next_chunk = False
+            print('[-] 放弃此段以寻求调整音频。')
+            continue
         file_name = os.path.basename(ts_url).split('?')[0]
         
         enc_ts = get_req(ts_url, proxies=proxies)
@@ -202,10 +209,24 @@ def main(m3u8_data, ts_path, m3u8_host, http_headers, arg_debug, debug_path, ski
                     f.write(enc_ts)
                 else:
                     try:
-                        dec_ts = decrypt(enc_ts, key, iv)
+                        dec_ts = decrypt(enc_ts, key, iv, 0)
                         f.write(dec_ts)
                     except ValueError:
-                        print('[-] 抛弃不满足 16 倍数解密的此段。') # hang and 声音位移
+                        # BLOCK_SIZE 16 also related to crypto_py_aes.py
+                        print('[i] 此段不满足 16 倍数解密。') # hang and 声音位移
+                        skip_next_chunk = True
+                        success_pad = False
+                        for i in range(1, 18):
+                            try:
+                                dec_ts = decrypt(enc_ts, key, iv, i)
+                                f.write(dec_ts)
+                                print('[+] 填充 ' + str(i) +  ' 字节成功。')
+                                success_pad = True
+                                break
+                            except ValueError:
+                                pass
+                        if not success_pad:
+                            print('[-] 放弃此段。')
         except PermissionError:
             print((traceback.format_exc()))
             print('请不要一边下载加密的 .ts 视频，一边观看该视频。 请重新下载该集。')
