@@ -77,7 +77,7 @@ from argparse import RawTextHelpFormatter
 arg_parser = argparse.ArgumentParser(
     description='独播库下载器', formatter_class=RawTextHelpFormatter)
 
-def quit(msgs, exit=True):
+def quit(msgs):
     if not isinstance(msgs, list):
         msgs = [msgs]
     if exit: #避免只看见最后一行“中止。”而不懂必须滚上查看真正错误原因。
@@ -88,9 +88,10 @@ def quit(msgs, exit=True):
         else:
             #cprint(msg, 'white', 'on_red', attrs=BOLD_ONLY)
             print(msg)
-    if exit:
-        #cprint('Abort.', 'white', 'on_red', attrs=BOLD_ONLY)
-        sys.exit()
+    # Should not do this way, use return instead to support gui callback
+    #if exit:
+    #    #cprint('Abort.', 'white', 'on_red', attrs=BOLD_ONLY)
+    #    sys.exit()
 
 #arg_parser.add_argument('-t', '--video-type', dest='video_type', action='store_true', help='Specify movie instead of cinemae')
 arg_parser.add_argument('-d', '--dir', help='用来储存连续剧/综艺的目录名 (非路径)。')
@@ -122,7 +123,7 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
         if not arg_url:
             print('main arg_url: ' + repr(arg_url))
             #quit('[!] [e1] Please specify cinema url in https://www.fanstui.com/voddetail-300.html. Abort.')
-            quit('[!] [e1] 请用该格式  https://www.duboku.net/voddetail/300.html 的链接。')
+            return quit('[!] [e1] 请用该格式  https://www.duboku.net/voddetail/300.html 的链接。')
 
         # Should accept these formats:
         # https://www.duboku.net/voddetail/300.html 
@@ -165,37 +166,37 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                 cinema_id = str(cinema_id)
                 cinema_url_middle = '-' + arg_url_m.split(VP_PREFIX)[1].split('-')[1] + '-'
             else:
-                #quit('[!] [e2] Please specify cinema url in https://www.fanstui.com/voddetail-300.html. Abort.')
-                quit('[!] [e2] 请用该格式 https://www.duboku.net/voddetail/300.html 的链接。')
+                #return quit('[!] [e2] Please specify cinema url in https://www.fanstui.com/voddetail-300.html. Abort.')
+                return quit('[!] [e2] 请用该格式 https://www.duboku.net/voddetail/300.html 的链接。')
         except ValueError as ve:
             print(ve)
-            #quit('[!] [e3] Please specify cinema url in https://www.fanstui.com/voddetail-300.html. Abort.')
-            quit('[!] [e3] 请用该格式  https://www.duboku.net/voddetail/300.html 的链接。')
+            #return quit('[!] [e3] Please specify cinema url in https://www.fanstui.com/voddetail-300.html. Abort.')
+            return quit('[!] [e3] 请用该格式  https://www.duboku.net/voddetail/300.html 的链接。')
 
 
         if arg_file:
             if arg_dir:
-                quit('[!] 不能同时使用 -d 和 -f 选项。')
+                return quit('[!] 不能同时使用 -d 和 -f 选项。')
                 
             ep_ts_path = os.path.abspath(arg_file + '.ts')
             ep_mp4_path = os.path.abspath(arg_file + '.mp4')
             arg_to_ep = 2
         else:
             if not arg_to_ep:
-                quit('[!] 请用 `--to-ep N` 选项决定从第 N 集停止下集。')
+                return quit('[!] 请用 `--to-ep N` 选项决定从第 N 集停止下集。')
             if arg_from_ep > arg_to_ep:
-                quit('[!] 从第几集必须小于或等于到第几集。')
+                return quit('[!] 从第几集必须小于或等于到第几集。')
             arg_to_ep+=1
 
             if not arg_dir:
-                quit('[!] 请用 `-d 目录名` 选项。')
+                return quit('[!] 请用 `-d 目录名` 选项。')
 
             dir_path_m = os.path.abspath(arg_dir)
             if not os.path.isdir(dir_path_m):
                 try:
                     os.makedirs(dir_path_m)
-                except OSError: # [todo:0] Does it causes issue if quit from gui?
-                    quit('[i] 无法创建目录。或许已有同名文件？ ')
+                except OSError:
+                    return quit('[i] 无法创建目录。或许已有同名文件？ ')
 
         # https://stackoverflow.com/questions/10606133/sending-user-agent-using-requests-library-in-python
         http_headers = {
