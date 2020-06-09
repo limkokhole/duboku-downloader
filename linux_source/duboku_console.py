@@ -35,23 +35,16 @@ from slimit.parser import Parser
 from slimit.visitors import nodevisitor
 '''
 
+import sys, os, traceback
 import requests
-from m3u8_decryptor import main as m3u8_decryptopr_main
-import sys
-import os
-import traceback
-import subprocess as sp
+
 PY3 = sys.version_info[0] >= 3
+if not PY3:
+    print('\n[!] python 2 已在 2020 年退休。请使用 python 3。中止。')
+    sys.exit(1)
 
-if PY3:
-    from urllib.parse import urlparse
-else:
-    from urlparse import urlparse
-
-if PY3:
-    from bs4 import BeautifulSoup  # python3
-else:
-    from BeautifulSoup import BeautifulSoup #python2
+from urllib.parse import urlparse
+from bs4 import BeautifulSoup
 
 #try: from urllib.request import urlopen #python3
 #except ImportError: from urllib2 import urlopen #python2
@@ -62,7 +55,7 @@ UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like 
 #import colorama
 #from colorama import Style, Fore, Back
 #colorama.init() # Windows need this
-BOLD_ONLY = ['bold']
+#BOLD_ONLY = ['bold']
 
 # https://github.com/limkokhole/calmjs.parse
 import calmjs # Used in `except calmjs...:`
@@ -75,7 +68,9 @@ from calmjs.parse.asttypes import VarDecl as CalmVar
 from calmjs.parse.walkers import Walker as CalmWalker
 from calmjs.parse.parsers.es5 import Parser as CalmParser
 
-from crypto_py_aes import main as crypto_py_aes_main
+from duboku_lib.m3u8_decryptor import main as m3u8_decryptopr_main
+from duboku_lib.ffmpeg_lib import remux_ts_to_mp4 
+from duboku_lib.crypto_py_aes import main as crypto_py_aes_main
 
 import argparse
 from argparse import RawTextHelpFormatter
@@ -103,7 +98,7 @@ arg_parser.add_argument('-f', '--file', help='用来储存电影的文件名。�
 #from/to options should grey out if -f selected:
 arg_parser.add_argument('-from-ep', '--from-ep', dest='from_ep', default=1, type=int, help='从第几集开始下载。')
 arg_parser.add_argument('-to-ep', '--to-ep', dest='to_ep',
-                        type=int, help='从第几集停止下载。')
+                        type=int, help='到第几集停止下载。')
 arg_parser.add_argument('-p', '--proxy', help='https 代理(如有)')
 arg_parser.add_argument('-g', '--debug', action='store_true', help='储存 duboku_epN.log 日志附件， 然后你可以在 https://github.com/limkokhole/duboku-downloader/issues 报告无法下载的问题。')
 arg_parser.add_argument('url', nargs='?', help='下载链接。')
@@ -229,63 +224,6 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
 
         def calm_var(node):
             return isinstance(node, CalmVar)
-
-        def remux_ts_to_mp4(ts_path, mp4_path):
-
-            print( '[...] 转换 .ts ({}) 去 .mp4 ({})'.format(ts_path, mp4_path) )
-            # -v verbose can see -bsf:a aac_adtstoasc already auto added
-            # no nid -crf 0(loseless)-51(blur) if -c copy
-            args = ['ffmpeg', '-v', 'verbose', '-y', '-i', ts_path, '-c', 'copy', mp4_path]
-            try:
-                # Don't put shell=True to not popup new console a while when invoke ffmpeg each time
-                #,  bcoz it's will silently failed with .ts get removed
-                proc = sp.Popen(args, stdin=sp.PIPE, stdout=sp.PIPE)        
-            except FileNotFoundError:
-                print('[😞] 转换失败, 文件不存在。')
-                print(traceback.format_exc())
-                return 127
-
-            retval = proc.wait()
-            print('[+] 转换完成。您已可以观看该视频: {}'.format(mp4_path) )
-            try:
-                os.remove(ts_path)
-            except OSError as e: 
-                print("[!] 转换完成但是删除 .ts 文件失败: %s - %s。" % (e.filename, e.strerror))
-
-            return retval
-
-            '''
-            from ffmpeg_progress import start as ffmpeg_start
-
-            #def ffmpeg_callback(infile: str, outfile: str, vstats_path: str):
-            def ffmpeg_callback(infile, outfile, vstats_path):
-                return sp.Popen(['ffmpeg',
-                                '-nostats',
-                                '-loglevel', '0',
-                                '-y',
-                                '-vstats_file', vstats_path,
-                                '-i', infile,
-                                'c', 'copy',
-                                outfile]).pid
-        s
-            def on_message_handler(percent ,#: float,
-                                fr_cnt ,#: int,
-                                total_frames ,#: int,
-                                elapsed ): #: float):
-                print('percent: ' + repr(percent))
-                #sys.stdout.write('\r{:.2f}%'.format(percent))
-                #sys.stdout.flush()
-
-            def on_done():
-                print('hole OK')
-
-            ffmpeg_start(ts_path,
-                        mp4_path,
-                ffmpeg_callback,
-                on_message=on_message_handler,
-                on_done=on_done,
-                wait_time=1)  # seconds
-            '''
 
         '''
         //https://github.com/brix/crypto-js
@@ -499,9 +437,6 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                         print('下载的 url: ' + ep_url)
                         print('下载的 ts 路径: ' + ep_ts_path)
                         print('下载的 mp4 路径: ' + ep_mp4_path)
-                        if not PY3:
-                            ep_ts_path = ep_ts_path.decode('utf-8')
-                            ep_mp4_path = ep_mp4_path.decode('utf-8')
 
                         if arg_debug:
                             with open('duboku_ep' + str(ep) + '.log', 'a') as f:

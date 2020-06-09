@@ -371,6 +371,11 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
 
+    PY3 = sys.version_info[0] >= 3
+    if not PY3:
+        print('请使用 python 3。中止。')
+        sys.exit(1)
+
     # Prevent closing pyside2 window then automatically re-open until closed console window
     # https://stackoverflow.com/questions/24944558/pyinstaller-built-windows-exe-fails-with-multiprocessing
     # On Windows calling this function is necessary.
