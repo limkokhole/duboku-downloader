@@ -194,7 +194,7 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
             if not os.path.isdir(dir_path_m):
                 try:
                     os.makedirs(dir_path_m)
-                except OSError:
+                except OSError: # [todo:0] Does it causes issue if quit from gui?
                     quit('[i] 无法创建目录。或许已有同名文件？ ')
 
         # https://stackoverflow.com/questions/10606133/sending-user-agent-using-requests-library-in-python
@@ -296,7 +296,11 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                     with open('duboku_ep' + str(ep) + '.log', 'w') as f:
                         f.write('URL: ' + url + '\n\n')
 
-                r = requests.get(url, allow_redirects=True, headers=http_headers, timeout=30, proxies=proxies)
+                try:
+                    r = requests.get(url, allow_redirects=True, headers=http_headers, timeout=30, proxies=proxies)
+                except requests.exceptions.ConnectionError:
+                    print('\n[!] 你的网络出现问题，也可能是网站的服务器问题。\n', flush=True)
+                    continue
 
                 if arg_debug:
                     with open('duboku_ep' + str(ep) + '.log', 'a') as f:
