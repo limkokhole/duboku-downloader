@@ -11,8 +11,11 @@ def reset_ts_start_time(ts_broken_path, ts_reset_path):
     try:
         proc = sp.Popen(args, stdin=sp.PIPE, stdout=sp.PIPE)
     except FileNotFoundError:
-        print('[😞] 转换失败, 文件不存在。')
         print(traceback.format_exc())
+        try:
+            print('[😞] 转换失败, 文件不存在。')
+        except UnicodeEncodeError:
+            print('[!] 修复失败, 文件不存在。')
         return 127
 
     retval = proc.wait()
@@ -24,7 +27,10 @@ def reset_ts_start_time(ts_broken_path, ts_reset_path):
             print("[!] 删除已损 .ts 文件失败: %s - %s。" % (e.filename, e.strerror))
         return ts_reset_path
     else: #1
-        print('[😞] 修复失败。')
+        try:
+            print('[😞] 修复失败。')
+        except UnicodeEncodeError:
+            print('[!] 修复失败。')
         return ts_broken_path
 
 def remux_ts_to_mp4(ts_path, mp4_path):
@@ -39,15 +45,21 @@ def remux_ts_to_mp4(ts_path, mp4_path):
         # args = [ffmpeg_path + " -v verbose -y -i " + ts_path + " -c copy " + mp4_path]
         # proc = sp.Popen(args, shell=True, stdin=sp.PIPE, stdout=sp.PIPE, cwd=os.path.dirname(os.path.realpath(__file__)) )       
     except FileNotFoundError:
-        print('[😞] 转换失败, 文件不存在。')
         print(traceback.format_exc())
+        try:
+            print('[😞] 转换失败, 文件不存在。')
+        except UnicodeEncodeError:
+            print('[!] 转换失败, 文件不存在。')
         return 127
 
     retval = proc.wait()
     if retval == 0:
         print('[+] 转换完成。您已可以观看该视频: {}'.format(mp4_path) )
     else: #1
-        print('[😞] 转换失败。')
+        try:
+            print('[😞] 转换失败。')
+        except UnicodeEncodeError:
+            print('[!] 转换失败。')
     try:
         os.remove(ts_path)
         #print('[-] 已删除 .ts 文件。{}'.format(ts_path) )

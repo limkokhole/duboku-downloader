@@ -479,8 +479,11 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                     #print(traceback.format_exc())
                 except Exception:
                     #Need to catch & print exception explicitly to pass to duboku_gui to show err log
-                    print('[😞]')
                     print(traceback.format_exc())
+                    try:
+                        print('[😞]')
+                    except UnicodeEncodeError:
+                        print('[!] 失败。')
 
             if not got_ep_url:
                 if not printed_err:
@@ -490,7 +493,10 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                         print('[!] 不存在第{}集。'.format(ep))
 
     except Exception:
-        print(traceback.format_exc())
+        try:
+            print(traceback.format_exc())
+        except UnicodeEncodeError:
+            print('[!] 出现错误。')
 
 
     print('[😄] 全部下载工作完毕。您已可以关闭窗口, 或下载别的视频。')
