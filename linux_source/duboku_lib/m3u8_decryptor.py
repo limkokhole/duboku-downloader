@@ -221,6 +221,10 @@ def main(m3u8_data, ts_path, m3u8_host, http_headers, arg_debug, debug_path, ski
                                 ts_chunk_reseted_fname = reset_ts_start_time(ts_chunk_fname_tmp, ts_chunk_fname)
                                 with open(ts_chunk_reseted_fname, 'rb') as ts_crf:
                                     f.write(ts_crf.read())
+                                try:
+                                    os.remove(ts_chunk_reseted_fname)
+                                except OSError:
+                                    print('[+] 删除临时文件失败: ' + repr(ts_chunk_reseted_fname) )
                                 success_pad = True
                                 break
                             except ValueError:
@@ -229,7 +233,7 @@ def main(m3u8_data, ts_path, m3u8_host, http_headers, arg_debug, debug_path, ski
                             print('[-] 放弃此段。')
         except PermissionError:
             print((traceback.format_exc()))
-            print('请不要一边下载加密的 .ts 视频，一边观看该视频。 请重新下载该集。')
+            print('[!] 请不要一边下载加密的 .ts 视频，一边观看该视频。 请重新下载该集。')
 
         ''' [onhold:0] How to know ts file size without download ???
         #with open(ts_path + str(ts_i+1), 'ab') as f:
