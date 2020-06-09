@@ -177,7 +177,8 @@ def main(m3u8_data, ts_path, m3u8_host, http_headers, arg_debug, debug_path, ski
     total_chunks = len(chunks)
     for ts_i, ts_url in enumerate(chunks):
 
-        print('[{}/{}] 处理中 {}'.format( (ts_i+1), total_chunks, ts_url) )
+        # Cmd need flush=True here:
+        print('[{}/{}] 处理中 {}'.format( (ts_i+1), total_chunks, ts_url ), flush=True)
         #ts_chunk_fname = os.path.basename(os.path.basename(ts_url).split('?')[0])
         
         enc_ts = get_req(ts_url, proxies=proxies)
