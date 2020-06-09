@@ -30,6 +30,10 @@ __email__ = 'limkokhole@gmail.com'
 __status__ = 'Production'
 
 import sys, os, logging, traceback
+PY3 = sys.version_info[0] >= 3
+if not PY3:
+    print('\n[!] python 2 已在 2020 年退休。请使用 python 3。中止。')
+    sys.exit(1)
 
 from logging.handlers import QueueHandler, QueueListener
 
