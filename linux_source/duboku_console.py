@@ -498,8 +498,10 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
         except UnicodeEncodeError:
             print('[!] 出现错误。')
 
-
-    print('[😄] 全部下载工作完毕。您已可以关闭窗口, 或下载别的视频。')
+    try:
+        print('[😄] 全部下载工作完毕。您已可以关闭窗口, 或下载别的视频。')
+    except UnicodeEncodeError:
+        print('[*] 全部下载工作完毕。您已可以关闭窗口, 或下载别的视频。')
 
     '''
     #slimit, https://stackoverflow.com/questions/44503833/python-slimit-minimizer-unwanted-warning-output
