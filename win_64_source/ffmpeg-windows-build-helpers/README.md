@@ -26,6 +26,6 @@ And I noticed --disable-everything only replaced this options ( p/s: Careful `--
     --disable-outdevs --disable-indevs --disable-protocols --disable-hwaccels --disable-parsers --disable-bsfs --disable-encoders --disable-decoders --disable-filters --disable-indev=v4l2 --disable-outdev=v4l2 --disable-v4l2-m2m --disable-muxers --disable-demuxers
     ```
 
-
+`--enable-muxer=mpegts` require to allow remux the DTS/PTS of individual broken .ts chunk。
 
 
