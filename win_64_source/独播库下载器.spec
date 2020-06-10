@@ -5,7 +5,7 @@ block_cipher = None
 
 a = Analysis(['duboku_gui.py'],
              pathex=['C:\\Users\\Administrator\\Documents\\duboku'],
-             binaries=[],
+             binaries=[ ('duboku_lib\\ffmpeg_minimal_ts_2_mp4.exe', 'duboku_lib') ],
              datas=[],
              hiddenimports=[],
              hookspath=[],

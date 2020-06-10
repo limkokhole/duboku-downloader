@@ -3,16 +3,16 @@
 
 ---
 ### 普通用户:
-Windows (64-bit) 用户，只需要下载 "独播库下载器_win_64_exe.zip", 解压缩后， 双击 "独播库下载器.exe" 文件执行。请确保附件 ffmpeg_minimal_ts_2_mp4.exe 与 "独播库下载器.exe" 在同一个目录。 
+Windows (64-bit) 用户，只需要下载 "独播库下载器_win_64_exe.zip", 解压缩后， 双击 "独播库下载器.exe" 文件执行。 
 
-如果出现问题可以[来这点击 New issue 报告。](https://github.com/limkokhole/duboku-downloader/issues)  
+如果出现问题可以[来这点击 New issue 报告。](https://github.com/limkokhole/duboku-downloader/issues)。
 
 ---
 ### python 3 用户:
 
 根据你的平台选择 linux_source 或 win_64_source 目录。
 
-你可以 `python3 duboku_gui.py` 打开图形界面，或 `python3 duboku_console.py -选项` 使用命令行界面。不再支持 python 2。
+你可以 `python3 duboku_gui.py` 打开图形界面，或 `python3 duboku_console.py -选项` 使用命令行界面。
 
 python3 用户必须先执行命令 `python3 -m pip install beautifulsoup4==4.7.1` 才能正常使用。 其余 `pip` 的依赖请参考 requirements_py3_gui.txt(图形界面) 或 requirements_py3_console.txt(命令行) 文件。
 
@@ -34,11 +34,10 @@ Windows 用户如果不想使用我编译的 ffmpeg_minimal_ts_2_mp4.exe， 只�
 ---
 ### 注意事项:
 
-1. 下载过程是先下载多段 .ts 文件，组成单个 .ts 文件， 完成后才转换去 .mp4，没有转换会导致某些播放器无法正常跳转或某部分模糊。请确保下载完毕不是 .ts 而是 .mp4。一次性转换的坏处是无法马上正常观赏(不建议未完成就去观看 .ts，容易下载失败)，好处是硬件消耗较低和下载速度较快。
-2. 转换 .ts 去 .mp4 的过程会出现黑窗口几秒。
-3. 重复下载 .ts/.mp4 会覆盖原本的同名 .ts/.mp4。如果转换 ts 去 mp4 失败可能不会保留 .ts。
-4. 某段 .ts 下载失败会显示信息， 要不要重新下载该集取决于你。
-5. 网络有时候慢导致下载失败， 就停止等一阵子才尝试。 
+1. 下载过程是先下载多段 .ts 文件，组成单个 .ts 文件， 完成后才转换去 .mp4，没有转换会导致某些播放器无法正常跳转或某部分模糊。请确保下载完毕不是 .ts 而是 .mp4。
+2. 重复下载 .ts/.mp4 会覆盖原本的同名 .ts/.mp4。如果转换 ts 去 mp4 失败可能不会保留 .ts。
+3. 某段 .ts 下载失败会显示信息， 要不要重新下载该集取决于你。
+4. 网络有时候慢导致下载失败， 就停止等一阵子才尝试。 
 
 ---
 ### 示范视频 (点击图片会在 YouTube 打开):

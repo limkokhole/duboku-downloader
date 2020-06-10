@@ -35,23 +35,16 @@ from slimit.parser import Parser
 from slimit.visitors import nodevisitor
 '''
 
+import sys, os, traceback
 import requests
-from m3u8_decryptor import main as m3u8_decryptopr_main
-import sys
-import os
-import traceback
-import subprocess as sp
+
 PY3 = sys.version_info[0] >= 3
+if not PY3:
+    print('\n[!] python 2 已在 2020 年退休。请使用 python 3。中止。')
+    sys.exit(1)
 
-if PY3:
-    from urllib.parse import urlparse
-else:
-    from urlparse import urlparse
-
-if PY3:
-    from bs4 import BeautifulSoup  # python3
-else:
-    from BeautifulSoup import BeautifulSoup #python2
+from urllib.parse import urlparse
+from bs4 import BeautifulSoup
 
 #try: from urllib.request import urlopen #python3
 #except ImportError: from urllib2 import urlopen #python2
@@ -62,7 +55,7 @@ UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like 
 #import colorama
 #from colorama import Style, Fore, Back
 #colorama.init() # Windows need this
-BOLD_ONLY = ['bold']
+#BOLD_ONLY = ['bold']
 
 # https://github.com/limkokhole/calmjs.parse
 import calmjs # Used in `except calmjs...:`
@@ -75,14 +68,16 @@ from calmjs.parse.asttypes import VarDecl as CalmVar
 from calmjs.parse.walkers import Walker as CalmWalker
 from calmjs.parse.parsers.es5 import Parser as CalmParser
 
-from crypto_py_aes import main as crypto_py_aes_main
+from duboku_lib.m3u8_decryptor import main as m3u8_decryptopr_main
+from duboku_lib.ffmpeg_lib import remux_ts_to_mp4 
+from duboku_lib.crypto_py_aes import main as crypto_py_aes_main
 
 import argparse
 from argparse import RawTextHelpFormatter
 arg_parser = argparse.ArgumentParser(
     description='独播库下载器', formatter_class=RawTextHelpFormatter)
 
-def quit(msgs, exit=True):
+def quit(msgs):
     if not isinstance(msgs, list):
         msgs = [msgs]
     if exit: #避免只看见最后一行“中止。”而不懂必须滚上查看真正错误原因。
@@ -93,9 +88,10 @@ def quit(msgs, exit=True):
         else:
             #cprint(msg, 'white', 'on_red', attrs=BOLD_ONLY)
             print(msg)
-    if exit:
-        #cprint('Abort.', 'white', 'on_red', attrs=BOLD_ONLY)
-        sys.exit()
+    # Should not do this way, use return instead to support gui callback
+    #if exit:
+    #    #cprint('Abort.', 'white', 'on_red', attrs=BOLD_ONLY)
+    #    sys.exit()
 
 #arg_parser.add_argument('-t', '--video-type', dest='video_type', action='store_true', help='Specify movie instead of cinemae')
 arg_parser.add_argument('-d', '--dir', help='用来储存连续剧/综艺的目录名 (非路径)。')
@@ -103,7 +99,7 @@ arg_parser.add_argument('-f', '--file', help='用来储存电影的文件名。�
 #from/to options should grey out if -f selected:
 arg_parser.add_argument('-from-ep', '--from-ep', dest='from_ep', default=1, type=int, help='从第几集开始下载。')
 arg_parser.add_argument('-to-ep', '--to-ep', dest='to_ep',
-                        type=int, help='从第几集停止下载。')
+                        type=int, help='到第几集停止下载。')
 arg_parser.add_argument('-p', '--proxy', help='https 代理(如有)')
 arg_parser.add_argument('-g', '--debug', action='store_true', help='储存 duboku_epN.log 日志附件， 然后你可以在 https://github.com/limkokhole/duboku-downloader/issues 报告无法下载的问题。')
 arg_parser.add_argument('url', nargs='?', help='下载链接。')
@@ -127,7 +123,7 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
         if not arg_url:
             print('main arg_url: ' + repr(arg_url))
             #quit('[!] [e1] Please specify cinema url in https://www.fanstui.com/voddetail-300.html. Abort.')
-            quit('[!] [e1] 请用该格式  https://www.duboku.net/voddetail/300.html 的链接。')
+            return quit('[!] [e1] 请用该格式  https://www.duboku.net/voddetail/300.html 的链接。')
 
         # Should accept these formats:
         # https://www.duboku.net/voddetail/300.html 
@@ -170,37 +166,37 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                 cinema_id = str(cinema_id)
                 cinema_url_middle = '-' + arg_url_m.split(VP_PREFIX)[1].split('-')[1] + '-'
             else:
-                #quit('[!] [e2] Please specify cinema url in https://www.fanstui.com/voddetail-300.html. Abort.')
-                quit('[!] [e2] 请用该格式 https://www.duboku.net/voddetail/300.html 的链接。')
+                #return quit('[!] [e2] Please specify cinema url in https://www.fanstui.com/voddetail-300.html. Abort.')
+                return quit('[!] [e2] 请用该格式 https://www.duboku.net/voddetail/300.html 的链接。')
         except ValueError as ve:
             print(ve)
-            #quit('[!] [e3] Please specify cinema url in https://www.fanstui.com/voddetail-300.html. Abort.')
-            quit('[!] [e3] 请用该格式  https://www.duboku.net/voddetail/300.html 的链接。')
+            #return quit('[!] [e3] Please specify cinema url in https://www.fanstui.com/voddetail-300.html. Abort.')
+            return quit('[!] [e3] 请用该格式  https://www.duboku.net/voddetail/300.html 的链接。')
 
 
         if arg_file:
             if arg_dir:
-                quit('[!] 不能同时使用 -d 和 -f 选项。')
+                return quit('[!] 不能同时使用 -d 和 -f 选项。')
                 
             ep_ts_path = os.path.abspath(arg_file + '.ts')
             ep_mp4_path = os.path.abspath(arg_file + '.mp4')
             arg_to_ep = 2
         else:
             if not arg_to_ep:
-                quit('[!] 请用 `--to-ep N` 选项决定从第 N 集停止下集。')
+                return quit('[!] 请用 `--to-ep N` 选项决定从第 N 集停止下集。')
             if arg_from_ep > arg_to_ep:
-                quit('[!] 从第几集必须小于或等于到第几集。')
+                return quit('[!] 从第几集必须小于或等于到第几集。')
             arg_to_ep+=1
 
             if not arg_dir:
-                quit('[!] 请用 `-d 目录名` 选项。')
+                return quit('[!] 请用 `-d 目录名` 选项。')
 
             dir_path_m = os.path.abspath(arg_dir)
             if not os.path.isdir(dir_path_m):
                 try:
                     os.makedirs(dir_path_m)
                 except OSError:
-                    quit('[i] 无法创建目录。或许已有同名文件？ ')
+                    return quit('[i] 无法创建目录。或许已有同名文件？ ')
 
         # https://stackoverflow.com/questions/10606133/sending-user-agent-using-requests-library-in-python
         http_headers = {
@@ -229,63 +225,6 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
 
         def calm_var(node):
             return isinstance(node, CalmVar)
-
-        def remux_ts_to_mp4(ts_path, mp4_path):
-
-            print( '[...] 转换 .ts ({}) 去 .mp4 ({})'.format(ts_path, mp4_path) )
-            # -v verbose can see -bsf:a aac_adtstoasc already auto added
-            # no nid -crf 0(loseless)-51(blur) if -c copy
-            args = ['./ffmpeg_minimal_ts_2_mp4', '-v', 'verbose', '-y', '-i', ts_path, '-c', 'copy', mp4_path]
-            try:
-                # Don't put shell=True to not popup new console a while when invoke ffmpeg each time
-                #,  bcoz it's will silently failed with .ts get removed
-                proc = sp.Popen(args, stdin=sp.PIPE, stdout=sp.PIPE)        
-            except FileNotFoundError:
-                print('[😞] 转换失败, 文件不存在。')
-                print(traceback.format_exc())
-                return 127
-
-            retval = proc.wait()
-            print('[+] 转换完成。您已可以观看该视频: {}'.format(mp4_path) )
-            try:
-                os.remove(ts_path)
-            except OSError as e: 
-                print("[!] 转换完成但是删除 .ts 文件失败: %s - %s。" % (e.filename, e.strerror))
-
-            return retval
-
-            '''
-            from ffmpeg_progress import start as ffmpeg_start
-
-            #def ffmpeg_callback(infile: str, outfile: str, vstats_path: str):
-            def ffmpeg_callback(infile, outfile, vstats_path):
-                return sp.Popen(['ffmpeg',
-                                '-nostats',
-                                '-loglevel', '0',
-                                '-y',
-                                '-vstats_file', vstats_path,
-                                '-i', infile,
-                                'c', 'copy',
-                                outfile]).pid
-        s
-            def on_message_handler(percent ,#: float,
-                                fr_cnt ,#: int,
-                                total_frames ,#: int,
-                                elapsed ): #: float):
-                print('percent: ' + repr(percent))
-                #sys.stdout.write('\r{:.2f}%'.format(percent))
-                #sys.stdout.flush()
-
-            def on_done():
-                print('hole OK')
-
-            ffmpeg_start(ts_path,
-                        mp4_path,
-                ffmpeg_callback,
-                on_message=on_message_handler,
-                on_done=on_done,
-                wait_time=1)  # seconds
-            '''
 
         '''
         //https://github.com/brix/crypto-js
@@ -358,7 +297,11 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                     with open('duboku_ep' + str(ep) + '.log', 'w') as f:
                         f.write('URL: ' + url + '\n\n')
 
-                r = requests.get(url, allow_redirects=True, headers=http_headers, timeout=30, proxies=proxies)
+                try:
+                    r = requests.get(url, allow_redirects=True, headers=http_headers, timeout=30, proxies=proxies)
+                except requests.exceptions.ConnectionError:
+                    print('\n[!] 你的网络出现问题，也可能是网站的服务器问题。\n', flush=True)
+                    continue
 
                 if arg_debug:
                     with open('duboku_ep' + str(ep) + '.log', 'a') as f:
@@ -499,9 +442,6 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                         print('下载的 url: ' + ep_url)
                         print('下载的 ts 路径: ' + ep_ts_path)
                         print('下载的 mp4 路径: ' + ep_mp4_path)
-                        if not PY3:
-                            ep_ts_path = ep_ts_path.decode('utf-8')
-                            ep_mp4_path = ep_mp4_path.decode('utf-8')
 
                         if arg_debug:
                             with open('duboku_ep' + str(ep) + '.log', 'a') as f:
@@ -544,8 +484,11 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                     #print(traceback.format_exc())
                 except Exception:
                     #Need to catch & print exception explicitly to pass to duboku_gui to show err log
-                    print('[😞]')
                     print(traceback.format_exc())
+                    try:
+                        print('[😞]')
+                    except UnicodeEncodeError:
+                        print('[!] 失败。')
 
             if not got_ep_url:
                 if not printed_err:
@@ -555,10 +498,15 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                         print('[!] 不存在第{}集。'.format(ep))
 
     except Exception:
-        print(traceback.format_exc())
+        try:
+            print(traceback.format_exc())
+        except UnicodeEncodeError:
+            print('[!] 出现错误。')
 
-
-    print('[😄] 全部下载工作完毕。您已可以关闭窗口, 或下载别的视频。')
+    try:
+        print('[😄] 全部下载工作完毕。您已可以关闭窗口, 或下载别的视频。')
+    except UnicodeEncodeError:
+        print('[*] 全部下载工作完毕。您已可以关闭窗口, 或下载别的视频。')
 
     '''
     #slimit, https://stackoverflow.com/questions/44503833/python-slimit-minimizer-unwanted-warning-output
