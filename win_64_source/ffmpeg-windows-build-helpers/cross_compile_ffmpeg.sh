@@ -2134,7 +2134,7 @@ build_ffmpeg() {
     fi
 
     #without enable-small (faster 1 second in average(2-3-4_seldom) vs --enable-small(3-4)):
-    config_options="$init_options --disable-everything --disable-network --disable-autodetect --disable-doc --disable-ffprobe --disable-swscale --disable-avdevice --disable-swresample --disable-bzlib --disable-sndio --disable-sdl2 --disable-libxcb_xfixes --disable-libxcb --disable-libxcb_shape --disable-libxcb_shm --disable-lzma --disable-iconv --disable-xlib --disable-zlib --enable-parser=aac --enable-bsf=extract_extradata --enable-muxer=mp4 --enable-demuxer=mpegts,aac,h264 --enable-decoder=aac,h264 --enable-parser=h264 --enable-protocol=file --enable-bsf=aac_adtstoasc"
+    config_options="$init_options --disable-everything --disable-network --disable-autodetect --disable-doc --disable-ffprobe --disable-swscale --disable-avdevice --disable-swresample --disable-bzlib --disable-sndio --disable-sdl2 --disable-libxcb_xfixes --disable-libxcb --disable-libxcb_shape --disable-libxcb_shm --disable-lzma --disable-iconv --disable-xlib --disable-zlib --enable-bsf=extract_extradata,aac_adtstoasc --enable-muxer=mp4,mpegts --enable-demuxer=mpegts,aac,h264 --enable-decoder=aac,h264 --enable-parser=h264,aac --enable-protocol=file"
 
     #A config_options+=" --enable-libdav1d"
 
@@ -2172,7 +2172,7 @@ build_ffmpeg() {
       config_options+=" --disable-libmfx"
     fi
     if [[ $enable_gpl == 'y' ]]; then
-      config_options+=" --enable-gpl --enable-avisynth --enable-frei0r --enable-filter=frei0r --enable-librubberband --enable-libvidstab --enable-libx264 --enable-libx265"
+      config_options+=" --enable-gpl --enable-frei0r --enable-filter=frei0r --enable-librubberband --enable-libvidstab --enable-libx264 --enable-libx265"
       config_options+=" --enable-libxvid"
       if [[ $compiler_flavors != "native" ]]; then
         config_options+=" --enable-libxavs" # don't compile OS X 

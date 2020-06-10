@@ -50,7 +50,7 @@ check_missing_packages () {
     VENDOR="redhat"
   fi
   # zeranoe's build scripts use wget, though we don't here...
-  local check_packages=('ragel' 'curl' 'pkg-config' 'make' 'git' 'svn' 'gcc' 'autoconf' 'automake' 'yasm' 'cvs' 'flex' 'bison' 'makeinfo' 'g++' 'ed' 'hg' 'pax' 'unzip' 'patch' 'wget' 'xz' 'nasm' 'gperf' 'autogen' 'bzip2' 'realpath' 'meson')
+  local check_packages=('ragel' 'curl' 'pkg-config' 'make' 'git' 'svn' 'gcc' 'autoconf' 'automake' 'yasm' 'cvs' 'flex' 'bison' 'makeinfo' 'g++' 'ed' 'hg' 'pax' 'unzip' 'patch' 'wget' 'xz' 'nasm' 'gperf' 'autogen' 'bzip2' 'realpath' 'meson' 'clang' 'python')
   # autoconf-archive is just for leptonica FWIW
   # I'm not actually sure if VENDOR being set to centos is a thing or not. On all the centos boxes I can test on it's not been set at all.
   # that being said, if it where set I would imagine it would be set to centos... And this contition will satisfy the "Is not initially set"
@@ -79,13 +79,17 @@ check_missing_packages () {
     if [[ $DISTRO == "Ubuntu" ]]; then
       echo "for ubuntu:"
       echo "$ sudo apt-get update"
-      echo -n " $ sudo apt-get install subversion ragel curl texinfo g++ bison flex cvs yasm automake libtool autoconf gcc cmake git make pkg-config zlib1g-dev mercurial unzip pax nasm gperf autogen bzip2 autoconf-archive p7zip-full meson"
+      echo -n " $ sudo apt-get install subversion ragel curl texinfo g++ bison flex cvs yasm automake libtool autoconf gcc cmake git make pkg-config zlib1g-dev mercurial unzip pax nasm gperf autogen bzip2 autoconf-archive p7zip-full meson clang"
       if at_least_required_version "18.04" "$(lsb_release -rs)"; then
         echo -n " python3-distutils" # guess it's no longer built-in, lensfun requires it...
       fi
+      if at_least_required_version "20.04" "$(lsb_release -rs)"; then
+        echo -n " python-is-python3"  # needed
+      fi
       echo " -y"
     else
-      echo "for OS X (homebrew): brew install ragel wget cvs hg yasm autogen automake autoconf cmake libtool xz pkg-config nasm bzip2 autoconf-archive p7zip coreutils meson" # if edit this edit docker/Dockerfile also :|
+      echo "for OS X (homebrew): brew install ragel wget cvs hg yasm autogen automake autoconf cmake libtool xz pkg-config nasm bzip2 autoconf-archive p7zip coreutils meson llvm" # if edit this edit docker/Dockerfile also :|
+      echo "   and set llvm to your PATH if on catalina"
       echo "for debian: same as ubuntu, but also add libtool-bin, ed"
       echo "for RHEL/CentOS: First ensure you have epel repo available, then run $ sudo yum install ragel subversion texinfo mercurial libtool autogen gperf nasm patch unzip pax ed gcc-c++ bison flex yasm automake autoconf gcc zlib-devel cvs bzip2 cmake3 -y"
       echo "for fedora: if your distribution comes with a modern version of cmake then use the same as RHEL/CentOS but replace cmake3 with cmake."
@@ -791,7 +795,7 @@ build_intel_quicksync_mfx() { # i.e. qsv, disableable via command line switch...
 
 build_libleptonica() {
   build_libjpeg_turbo
-  do_git_checkout https://github.com/DanBloomberg/leptonica.git  leptonica_git 387d398138783222148a5866514ae9e4eda872a5
+  do_git_checkout https://github.com/DanBloomberg/leptonica.git leptonica_git 387d398138783222148a5866514ae9e4eda872a5
   cd leptonica_git
     generic_configure "--without-libopenjpeg" # never could quite figure out how to get it to work with jp2 stuffs...I think OPJ_STATIC or something, see issue for tesseract
     do_make_and_make_install
@@ -904,13 +908,15 @@ build_harfbuzz() {
   # basically gleaned from https://gist.github.com/roxlu/0108d45308a0434e27d4320396399153
   if [ ! -f harfbuzz_git/already_done_harf ]; then # TODO make freetype into separate dirs so I don't need this weird double hack file...
     build_freetype "--without-harfbuzz"
-    do_git_checkout  https://github.com/harfbuzz/harfbuzz.git harfbuzz_git 8b6eb6cf465032d0ca747f4b75f6e9155082bc45
-    # cmake no .pc file :|
+    do_git_checkout  https://github.com/harfbuzz/harfbuzz.git harfbuzz_git
+    # cmake no .pc file so use configure :|
     cd harfbuzz_git
       if [ ! -f configure ]; then
         ./autogen.sh # :|
       fi
+      export LDFLAGS=-lpthread # :|
       generic_configure "--with-freetype=yes --with-fontconfig=no --with-icu=no" # no fontconfig, don't want another circular what? icu is #372
+      unset LDFLAGS
       do_make_and_make_install
     cd ..
   
@@ -918,8 +924,8 @@ build_harfbuzz() {
     touch harfbuzz_git/already_done_harf
     echo "done harfbuzz"
   fi
-  sed -i.bak 's/-lfreetype.*/-lfreetype -lharfbuzz/' "$PKG_CONFIG_PATH/freetype2.pc"
-  sed -i.bak 's/-lharfbuzz.*/-lharfbuzz -lfreetype/' "$PKG_CONFIG_PATH/harfbuzz.pc"
+  sed -i.bak 's/-lfreetype.*/-lfreetype -lharfbuzz -lpthread/' "$PKG_CONFIG_PATH/freetype2.pc" # for some reason it lists harfbuzz as Requires.private only??
+  sed -i.bak 's/-lharfbuzz.*/-lharfbuzz -lfreetype/' "$PKG_CONFIG_PATH/harfbuzz.pc" # does anything even use this?
   sed -i.bak 's/libfreetype.la -lbz2/libfreetype.la -lharfbuzz -lbz2/' "${mingw_w64_x86_64_prefix}/lib/libfreetype.la" # XXX what the..needed?
   sed -i.bak 's/libfreetype.la -lbz2/libfreetype.la -lharfbuzz -lbz2/' "${mingw_w64_x86_64_prefix}/lib/libharfbuzz.la"
 }
@@ -1372,7 +1378,7 @@ build_libflite() {
 }
 
 build_libsnappy() {
-  do_git_checkout https://github.com/google/snappy.git snappy_git
+  do_git_checkout https://github.com/google/snappy.git snappy_git e9e11b84e629c3e06fbaa4f0a86de02ceb9d6992 # got weird failure once
   cd snappy_git
     do_cmake_and_install "-DBUILD_BINARY=OFF -DCMAKE_BUILD_TYPE=Release -DSNAPPY_BUILD_TESTS=OFF" # extra params from deadsix27 and from new cMakeLists.txt content
     rm -f $mingw_w64_x86_64_prefix/lib/libsnappy.dll.a # unintall shared :|
@@ -1528,7 +1534,7 @@ build_zvbi() {
 }
 
 build_fribidi() {
-  do_git_checkout https://github.com/fribidi/fribidi.git fribidi_git 79581cc93b26c84edf74c9b51511126e0aacec9e
+  do_git_checkout https://github.com/fribidi/fribidi.git fribidi_git edb58d3fbd99726673b821f708a99182928bd452
   cd fribidi_git
     cpu_count=1 # needed apparently with git master
     generic_configure "--disable-debug --disable-deprecated --disable-docs"
@@ -1630,10 +1636,7 @@ build_dav1d() {
 
 build_libx265() {
   # the only one that uses mercurial, so there's some extra initial junk in this method... XXX needs some cleanup :|
-  local checkout_dir=x265
-  if [[ $high_bitdepth == "y" ]]; then
-    checkout_dir=x265_high_bitdepth_10
-  fi
+  local checkout_dir=x265_all_bitdepth
 
   if [[ $prefer_stable = "n" ]]; then
     local old_hg_version
@@ -1654,12 +1657,11 @@ build_libx265() {
       cd $checkout_dir
       old_hg_version=none-yet
     fi
-    cd source
 
     local new_hg_version=`hg --debug id -i`
     if [[ "$old_hg_version" != "$new_hg_version" ]]; then
       echo "got upstream hg changes, forcing rebuild...x265"
-      rm -f already*
+      rm -f 8bit/already* 10bit/already* 12bit/already*
     else
       echo "still at hg $new_hg_version x265"
     fi
@@ -1683,30 +1685,53 @@ build_libx265() {
       cd $checkout_dir
       old_hg_version=none-yet
     fi
-    cd source
 
     local new_hg_version=`hg --debug id -i`
     if [[ "$old_hg_version" != "$new_hg_version" ]]; then
       echo "got upstream hg changes, forcing rebuild...x265"
-      rm -f already*
+      rm -f 8bit/already* 10bit/already* 12bit/already*
     else
       echo "still at hg $new_hg_version x265"
     fi
-  fi # dont with prefer_stable = [y|n]
+  fi # done with prefer_stable = [y|n]
 
-  local cmake_params="-DENABLE_SHARED=0 -DENABLE_CLI=1" # build x265.exe
+
+  local cmake_params="-DENABLE_SHARED=0" # build x265.exe
   if [ "$bits_target" = "32" ]; then
     cmake_params+=" -DWINXP_SUPPORT=1" # enable windows xp/vista compatibility in x86 build
     cmake_params="$cmake_params -DENABLE_ASSEMBLY=OFF" # apparently required or build fails
   fi
-  if [[ $high_bitdepth == "y" ]]; then
-    cmake_params+=" -DHIGH_BIT_DEPTH=1" # Enable 10 bits (main10) per pixels profiles. XXX have an option for 12 here too??? gah...
-  fi
 
-  do_cmake "$cmake_params"
+  mkdir -p 8bit 10bit 12bit
+
+  # Build 12bit (main12)
+  cd 12bit
+  local cmake_12bit_params="$cmake_params -DENABLE_CLI=0 -DHIGH_BIT_DEPTH=1 -DMAIN12=1 -DEXPORT_C_API=0"
+  do_cmake_from_build_dir ../source "$cmake_12bit_params"
   do_make
-  echo force reinstall in case bit depth changed at all :|
-  rm already_ran_make_install*
+  cp libx265.a ../8bit/libx265_main12.a
+
+  # Build 10bit (main10)
+  cd ../10bit
+  local cmake_10bit_params="$cmake_params -DENABLE_CLI=0 -DHIGH_BIT_DEPTH=1 -DENABLE_HDR10_PLUS=1 -DEXPORT_C_API=0"
+  do_cmake_from_build_dir ../source "$cmake_10bit_params"
+  do_make
+  cp libx265.a ../8bit/libx265_main10.a
+
+  # Build 8 bit (main) with linked 10 and 12 bit then install
+  cd ../8bit
+  cmake_params="$cmake_params -DENABLE_CLI=1 -DEXTRA_LINK_FLAGS=-L -DLINKED_10BIT=1 -DLINKED_12BIT=1 -DEXTRA_LIB='$(pwd)/libx265_main10.a;$(pwd)/libx265_main12.a'"
+  do_cmake_from_build_dir ../source "$cmake_params"
+  do_make
+  mv libx265.a libx265_main.a
+  ${cross_prefix}ar -M <<EOF
+CREATE libx265.a
+ADDLIB libx265_main.a
+ADDLIB libx265_main10.a
+ADDLIB libx265_main12.a
+SAVE
+END
+EOF
   do_make_install
   cd ../..
 }
@@ -2061,9 +2086,6 @@ build_ffmpeg() {
   if [[ "$non_free" = "y" ]]; then
     output_dir+="_with_fdk_aac"
   fi
-  if [[ $high_bitdepth == "y" ]]; then
-    output_dir+="_x26x_high_bitdepth"
-  fi
   if [[ $build_intel_qsv == "n" ]]; then
     output_dir+="_xp_compat"
   fi
@@ -2133,11 +2155,12 @@ build_ffmpeg() {
       init_options+=" --disable-schannel"
       # Fix WinXP incompatibility by disabling Microsoft's Secure Channel, because Windows XP doesn't support TLS 1.1 and 1.2, but with GnuTLS or OpenSSL it does.  XP compat!
     fi
-    config_options="$init_options --enable-libcaca --enable-gray --enable-libtesseract --enable-fontconfig --enable-gmp --enable-gnutls --enable-libass --enable-libbluray --enable-libbs2b --enable-libflite --enable-libfreetype --enable-libfribidi --enable-libgme --enable-libgsm --enable-libilbc --enable-libmodplug --enable-libmp3lame --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libopus --enable-libsnappy --enable-libsoxr --enable-libspeex --enable-libtheora --enable-libtwolame --enable-libvo-amrwbenc --enable-libvorbis --enable-libwebp --enable-libzimg --enable-libzvbi --enable-libmysofa --enable-libopenjpeg  --enable-libopenh264 --enable-liblensfun  --enable-libvmaf --enable-libsrt --enable-demuxer=dash --enable-libxml2 --enable-opengl --enable-libdav1d"
+    config_options="$init_options --enable-libcaca --enable-gray --enable-libtesseract --enable-fontconfig --enable-gmp --enable-gnutls --enable-libass --enable-libbluray --enable-libbs2b --enable-libflite --enable-libfreetype --enable-libfribidi --enable-libgme --enable-libgsm --enable-libilbc --enable-libmodplug --enable-libmp3lame --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libopus --enable-libsnappy --enable-libsoxr --enable-libspeex --enable-libtheora --enable-libtwolame --enable-libvo-amrwbenc --enable-libvorbis --enable-libwebp --enable-libzimg --enable-libzvbi --enable-libmysofa --enable-libopenjpeg  --enable-libopenh264 --enable-liblensfun  --enable-libvmaf --enable-libsrt --enable-demuxer=dash --enable-libxml2 --enable-opengl --enable-libdav1d --enable-cuda-llvm"
 
     if [ "$bits_target" != "32" ]; then
       #SVT-HEVC no longer needs to be disabled to configure with svt-av1, but svt-vp9 still conflicts with svt-av1 so svt-vp9 can only be compiled alone
-      config_options+=" --enable-libsvthevc"
+      #config_options+=" --enable-libsvthevc"
+      echo " not sure how to enable svthevc"
     fi
 
     #aom must be disabled to use SVT-AV1
@@ -2169,7 +2192,7 @@ build_ffmpeg() {
       config_options+=" --disable-libmfx"
     fi
     if [[ $enable_gpl == 'y' ]]; then
-      config_options+=" --enable-gpl --enable-avisynth --enable-frei0r --enable-filter=frei0r --enable-librubberband --enable-libvidstab --enable-libx264 --enable-libx265"
+      config_options+=" --enable-gpl --enable-frei0r --enable-filter=frei0r --enable-librubberband --enable-libvidstab --enable-libx264 --enable-libx265"
       config_options+=" --enable-libxvid"
       if [[ $compiler_flavors != "native" ]]; then
         config_options+=" --enable-libxavs" # don't compile OS X 
@@ -2510,7 +2533,6 @@ while true; do
       --git-get-latest=y [do a git pull for latest code from repositories like FFmpeg--can force a rebuild if changes are detected]
       --build-x264-with-libav=n build x264.exe with bundled/included "libav" ffmpeg libraries within it
       --prefer-stable=y build a few libraries from releases instead of git master
-      --high-bitdepth=n Enable high bit depth for x264 (10 bits) and x265 (10 and 12 bits, x64 build. Not officially supported on x86 (win32), but enabled by disabling its assembly).
       --debug Make this script  print out each line as it executes
       --enable-gpl=[y] set to n to do an lgpl build
       --build-dependencies=y [builds the ffmpeg dependencies. Disable it when the dependencies was built once and can greatly reduce build time. ]
@@ -2536,10 +2558,9 @@ while true; do
     --disable-nonfree=* ) disable_nonfree="${1#*=}"; shift ;;
     # this doesn't actually "build all", like doesn't build 10 high-bit LGPL ffmpeg, but it does exercise the "non default" type build options...
     -a         ) compiler_flavors="multi"; build_mplayer=n; build_libmxf=y; build_mp4box=y; build_vlc=y; build_lsw=y; 
-                 high_bitdepth=y; build_ffmpeg_static=y; build_ffmpeg_shared=y; build_lws=y;
-                 disable_nonfree=n; git_get_latest=y; sandbox_ok=y; build_amd_amf=y; build_intel_qsv=y; 
-                 build_dvbtee=y; build_x264_with_libav=y; shift ;;
-    -d         ) gcc_cpu_count=$cpu_count; disable_nonfree="y"; sandbox_ok="y"; compiler_flavors="win32"; git_get_latest="n"; shift ;;
+                 build_ffmpeg_static=y; build_ffmpeg_shared=y; build_lws=y; disable_nonfree=n; git_get_latest=y; 
+                 sandbox_ok=y; build_amd_amf=y; build_intel_qsv=y; build_dvbtee=y; build_x264_with_libav=y; shift ;;
+    -d         ) gcc_cpu_count=$cpu_count; disable_nonfree="y"; sandbox_ok="y"; compiler_flavors="win64"; git_get_latest="n"; shift ;;
     --compiler-flavors=* ) 
          compiler_flavors="${1#*=}"; 
          if [[ $compiler_flavors == "native" && $OSTYPE == darwin* ]]; then
@@ -2551,7 +2572,6 @@ while true; do
     --build-ffmpeg-shared=* ) build_ffmpeg_shared="${1#*=}"; shift ;;
     --prefer-stable=* ) prefer_stable="${1#*=}"; shift ;;
     --enable-gpl=* ) enable_gpl="${1#*=}"; shift ;;
-    --high-bitdepth=* ) high_bitdepth="${1#*=}"; shift ;;
     --build-dependencies=* ) build_dependencies="${1#*=}"; shift ;;
     --debug ) set -x; shift ;;
     -- ) shift; break ;;
@@ -2654,4 +2674,3 @@ echo "searching for all local exe's (some may not have been built this round, NB
 for file in $(find_all_build_exes); do
   echo "built $file"
 done
-
