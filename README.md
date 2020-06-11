@@ -25,7 +25,7 @@ Linux 用户请确保安装了 `ffmpeg` 命令。
 
 例子3(储存开 issue 需要的 duboku_epN.log 日志): `python3 duboku_console.py https://www.duboku.net/voddetail/1152.html -f 返校 --debug`   
 
-例子4(代理): `python3 duboku_console.py https://www.duboku.net/voddetail/1152.html -f 返校 --proxy http://127.0.0.1:22`
+例子4(HTTPS 代理): `python3 duboku_console.py https://www.duboku.net/voddetail/1152.html -f 返校 --proxy https://127.0.0.1:22`
 
 ---
 ### 注意事项:
