@@ -16,8 +16,6 @@ python3 用户必须先执行命令 `python3 -m pip install beautifulsoup4==4.7.
 
 Linux 用户请确保安装了 `ffmpeg` 命令。 
 
-Windows 用户如果不想使用我编译的 ffmpeg_minimal_ts_2_mp4.exe， 只需修改 `duboku_gui.py` 的 `'./ffmpeg_minimal_ts_2_mp4'` 去你的 ffmpeg 路径， 抑或自行下载 ffmpeg 后命名成 fmpeg_minimal_ts_2_mp4 替代。
-
 ###### 命令行界面的用法:
 请自行参考 `python3 duboku_console.py --help`。
 
