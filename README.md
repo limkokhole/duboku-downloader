@@ -3,7 +3,7 @@
 
 ---
 ### 普通用户:
-Windows (64-bit) 用户，只需要下载 "独播库下载器_win_64_exe.zip", 解压缩后， 双击 "独播库下载器.exe" 文件执行。 
+Windows (64-bit) 用户，只需要下载 "[独播库下载器_win_64_exe.zip](https://github.com/limkokhole/duboku-downloader/raw/master/%E7%8B%AC%E6%92%AD%E5%BA%93%E4%B8%8B%E8%BD%BD%E5%99%A8_win_64_exe.zip)", 解压缩后， 双击 "独播库下载器.exe" 文件执行。 
 
 ---
 ### python 3 用户:
