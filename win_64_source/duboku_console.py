@@ -77,9 +77,10 @@ from argparse import RawTextHelpFormatter
 arg_parser = argparse.ArgumentParser(
     description='独播库下载器', formatter_class=RawTextHelpFormatter)
 
-def quit(msgs):
+def quit(msgs, exit=True):
     if not isinstance(msgs, list):
         msgs = [msgs]
+    # 搞笑 bug: 之前无意中移除 exit=True，导致我系统有默认 exit 没问题，别人却有问题。
     if exit: #避免只看见最后一行“中止。”而不懂必须滚上查看真正错误原因。
         msgs[-1]+= '中止。'
     for msg in msgs:
