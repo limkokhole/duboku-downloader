@@ -192,10 +192,14 @@ def main(m3u8_data, ts_path, m3u8_host, http_headers, arg_debug, debug_path, ski
     total_chunks = len(chunks)
     for ts_i, ts_url in enumerate(chunks):
 
+        ts_url = ts_url.strip()
         # Cmd need flush=True here:
         #ts_chunk_fname = os.path.basename(os.path.basename(ts_url).split('?')[0])
         if '://' not in ts_url:
-            ts_url = m3u8_host + ts_url
+            if ts_url.startswith('/'):
+                ts_url = m3u8_host[:-1] + ts_url
+            else:
+                ts_url = m3u8_host + ts_url
             print('[{}/{}] 处理中+ {}'.format( (ts_i+1), total_chunks, ts_url ), flush=True)
         else:
             print('[{}/{}] 处理中 {}'.format( (ts_i+1), total_chunks, ts_url ), flush=True)
