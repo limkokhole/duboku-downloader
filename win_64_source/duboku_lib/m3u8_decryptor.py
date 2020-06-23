@@ -150,6 +150,8 @@ def main(m3u8_data, ts_path, m3u8_host, http_headers, arg_debug, debug_path, ski
         print(('[2] chunks: ' + repr(chunks)))
         if chunks:
             key_url = chunks[0]
+            if '://' not in key_url:
+                key_url = m3u8_host + key_url
             key = get_req(key_url, proxies=proxies)
             iv = key
         else:
@@ -157,15 +159,28 @@ def main(m3u8_data, ts_path, m3u8_host, http_headers, arg_debug, debug_path, ski
             key_url = None
             key = None
             iv = None
-        chunks = re.findall(r'https?://.*ts', sub_data)
+        chunks = []
+        #print(repr(sub_data.split('\n')))
+        for d in sub_data.split('\n'):
+            d = d.strip()
+            if not d.startswith('#') and d.endswith('.ts'):
+                #print(123)
+                chunks.append(d)
+        #chunks = re.findall(r'https?://.*ts', sub_data)
         #chunks = chunks[1:]
     else:
         chunks = chunks[0]
         key_url = chunks[0]
+        if '://' not in key_url:
+            key_url = m3u8_host + key_url
         key = get_req(key_url, proxies=proxies)
         iv = chunks[1][2:]
         #iv = iv.decode('hex')
-        chunks = re.findall(r'https?://.*ts', sub_data)
+        for d in sub_data.split('\n'):
+            d = d.strip()
+            if not d.startswith('#') and d.endswith('.ts'):
+                 chunks.append(d)
+        #chunks = re.findall(r'https?://.*ts', sub_data)
         #chunks = chunks[2:]
 
     print(('key_url: ' + repr(key_url)))
@@ -178,9 +193,13 @@ def main(m3u8_data, ts_path, m3u8_host, http_headers, arg_debug, debug_path, ski
     for ts_i, ts_url in enumerate(chunks):
 
         # Cmd need flush=True here:
-        print('[{}/{}] 处理中 {}'.format( (ts_i+1), total_chunks, ts_url ), flush=True)
         #ts_chunk_fname = os.path.basename(os.path.basename(ts_url).split('?')[0])
-        
+        if '://' not in ts_url:
+            ts_url = m3u8_host + ts_url
+            print('[{}/{}] 处理中+ {}'.format( (ts_i+1), total_chunks, ts_url ), flush=True)
+        else:
+            print('[{}/{}] 处理中 {}'.format( (ts_i+1), total_chunks, ts_url ), flush=True)
+
         enc_ts = get_req(ts_url, proxies=proxies)
 
         #print(enc_ts)
