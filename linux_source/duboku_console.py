@@ -124,7 +124,7 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
         if not arg_url:
             print('main arg_url: ' + repr(arg_url))
             #quit('[!] [e1] Please specify cinema url in https://www.fanstui.com/voddetail-300.html. Abort.')
-            return quit('[!] [e1] 请用该格式  https://www.duboku.net/voddetail/300.html 的链接。')
+            return quit('[!] [e1] 请用该格式  https://www.duboku.co/voddetail/300.html 的链接。')
 
         # Should accept these formats:
         # https://www.duboku.net/voddetail/300.html 
@@ -133,21 +133,27 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
         # https://www.fanstui.com/vp/529-1-1.html # Deprecated
         # https://tv.newsinportal.com/vodplay/1382-1-3.html
         #VODPLAY_PREFIX = 'https://www.fanstui.com/vodplay/'
-        NEWS_VODPLAY_PREFIX = 'https://tv.newsinportal.com/vodplay/'
-        VODPLAY_PREFIX = 'https://www.duboku.net/vodplay/'
-        VODDETAIL_PREFIX = 'https://www.duboku.net/voddetail/'
+        NEWS_VODPLAY_PREFIX = 'vodplay/'
+        VODPLAY_PREFIX = 'vodplay/'
+        VODDETAIL_PREFIX = 'voddetail/'
         #VP_PREFIX = 'https://www.fanstui.com/vp/'
-        VP_PREFIX = 'https://www.duboku.net/vp/'
+        VP_PREFIX = 'vp/'
+        ORIG_PREFIX='voddetail-'
 
         cinema_url_post = '.html'
-        #cinema_url_pre = 'https://www.fanstui.com/vodplay/'
-        cinema_url_pre = 'https://www.duboku.net/vodplay/'
-        arg_url_m = arg_url.strip() #.replace('https://www.duboku.net/', 'https://www.fanstui.com/')
+        #cinema_url_pre = 'https://www.duboku.net/vodplay/'
+
+        if '://' not in arg_url:
+            arg_url = 'https://' + arg_url
+        arg_path = '/'.join( arg_url.split('/')[3:] )
+        cinema_url_pre = '/'.join( arg_url.split('/')[:3]) + '/' + VODPLAY_PREFIX
+
+        arg_url_m = arg_path.strip() #.replace('https://www.duboku.net/', 'https://www.fanstui.com/')
         try:
             #if arg_url_m.startswith('https://www.fanstui.com/voddetail-'):
-            if arg_url_m.startswith('https://www.duboku.net/voddetail-'):
+            if arg_url_m.startswith(ORIG_PREFIX):
                 #cinema_id = int(arg_url_m.split('https://www.fanstui.com/voddetail-')[1].split('.html')[0])
-                cinema_id = int(arg_url_m.split('https://www.duboku.net/voddetail-')[1].split('.html')[0])
+                cinema_id = int(arg_url_m.split(ORIG_PREFIX)[1].split('.html')[0])
                 cinema_id = str(cinema_id) #set back str after test int() ValueError
                 cinema_url_middle = '-1-'
             elif arg_url_m.startswith(NEWS_VODPLAY_PREFIX):
@@ -168,11 +174,11 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                 cinema_url_middle = '-' + arg_url_m.split(VP_PREFIX)[1].split('-')[1] + '-'
             else:
                 #return quit('[!] [e2] Please specify cinema url in https://www.fanstui.com/voddetail-300.html. Abort.')
-                return quit('[!] [e2] 请用该格式 https://www.duboku.net/voddetail/300.html 的链接。')
+                return quit('[!] [e2] 请用该格式 https://www.duboku.co/voddetail/300.html 的链接。')
         except ValueError as ve:
             print(ve)
             #return quit('[!] [e3] Please specify cinema url in https://www.fanstui.com/voddetail-300.html. Abort.')
-            return quit('[!] [e3] 请用该格式  https://www.duboku.net/voddetail/300.html 的链接。')
+            return quit('[!] [e3] 请用该格式  https://www.duboku.co/voddetail/300.html 的链接。')
 
 
         if arg_file:
