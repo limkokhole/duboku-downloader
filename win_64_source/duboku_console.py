@@ -145,8 +145,8 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
 
         if '://' not in arg_url:
             arg_url = 'https://' + arg_url
-        arg_path = '/'.join( arg_url.split('/')[3:] )
-        cinema_url_pre = '/'.join( arg_url.split('/')[:3]) + '/' + VODPLAY_PREFIX
+        arg_path = '/'.join( arg_url.split('/')[-2:] )
+        cinema_url_pre = '/'.join( arg_url.split('/')[:-2]) + '/' + VODPLAY_PREFIX
 
         arg_url_m = arg_path.strip() #.replace('https://www.duboku.net/', 'https://www.fanstui.com/')
         try:
