@@ -30,10 +30,13 @@ __status__ = 'Production'
 
 import os, sys, traceback, time
 import requests, re
+import uuid
+from urllib.parse import urljoin, urlparse
 from Cryptodome.Cipher import AES
 from Cryptodome.Util.Padding import pad
 
 from .ffmpeg_lib import reset_ts_start_time 
+
 
 def decrypt(data, key, iv, guest_padding_size):
     """Decrypt using AES CBC"""
@@ -44,6 +47,7 @@ def decrypt(data, key, iv, guest_padding_size):
     else:
         return decryptor.decrypt(pad(data, guest_padding_size)) # You want pad to fill AND before decrypt, not unpad AND after decrypt. hexdump to view its last line not 16-bytes and need fill
     
+
 def get_req(url, proxies={}):
     """Get binary data from URL"""
 
@@ -60,7 +64,17 @@ def get_req(url, proxies={}):
     #return None
 
 
-def main(m3u8_data, ts_path, m3u8_host, http_headers, arg_debug, debug_path, skip_ad=True, proxies={}):
+def parse_url(m3u8_host, m3u8_base, url):
+    if '://' in url:
+        return url
+    else:
+        if url.startswith('/'):
+            return ''.join([ m3u8_host, url[1:] ])
+        else:
+            return ''.join([ m3u8_base, url ])
+
+
+def main(m3u8_data, ts_path, ep_url, http_headers, arg_debug, debug_path, skip_ad=True, proxies={}):
 
     '''
     #testing:
@@ -73,6 +87,8 @@ def main(m3u8_data, ts_path, m3u8_host, http_headers, arg_debug, debug_path, ski
     BANDWIDTH=1663000,RESOLUTION=465x1080\n/ppvod/XYZhNcTU\n'
     '''
 
+    m3u8_host = '{uri.scheme}://{uri.netloc}/'.format(uri= urlparse(ep_url) )
+    m3u8_base = urljoin(ep_url, '.')
 
     # download and decrypt chunks
     #print((repr(m3u8_data)))
@@ -101,14 +117,11 @@ def main(m3u8_data, ts_path, m3u8_host, http_headers, arg_debug, debug_path, ski
         real_m3u8_data = ''
         for i in sorted(list(m3u8_resolution_d.keys()), reverse=True):
             try:
-                real_m3u8_url_path = m3u8_resolution_d[i]
-                if real_m3u8_url_path.startswith('http'):
-                    real_m3u8_url = real_m3u8_url_path
-                else:
-                    if real_m3u8_url_path.startswith('/'):
-                        real_m3u8_url_path = real_m3u8_url_path[1:]
-                    real_m3u8_url = ''.join([m3u8_host, real_m3u8_url_path])
+                real_m3u8_url = parse_url(m3u8_host, m3u8_base, m3u8_resolution_d[i])
                 print(('real m3u8 url: ' + repr(real_m3u8_url)))
+
+                m3u8_host = '{uri.scheme}://{uri.netloc}/'.format(uri= urlparse( real_m3u8_url ) )
+                m3u8_base = urljoin( real_m3u8_url, '.')
 
                 if arg_debug:
                     with open(debug_path, 'a') as f:
@@ -149,9 +162,7 @@ def main(m3u8_data, ts_path, m3u8_host, http_headers, arg_debug, debug_path, ski
         chunks = re.findall('#EXT-X-KEY:METHOD=AES-128,URI="(.*)"', sub_data)
         print(('[2] chunks: ' + repr(chunks)))
         if chunks:
-            key_url = chunks[0]
-            if '://' not in key_url:
-                key_url = m3u8_host + key_url
+            key_url = parse_url(m3u8_host, m3u8_base, chunks[0])
             key = get_req(key_url, proxies=proxies)
             iv = key
         else:
@@ -170,9 +181,7 @@ def main(m3u8_data, ts_path, m3u8_host, http_headers, arg_debug, debug_path, ski
         #chunks = chunks[1:]
     else:
         chunks = chunks[0]
-        key_url = chunks[0]
-        if '://' not in key_url:
-            key_url = m3u8_host + key_url
+        key_url = parse_url(m3u8_host, m3u8_base, chunks[0])
         key = get_req(key_url, proxies=proxies)
         iv = chunks[1][2:]
         #iv = iv.decode('hex')
@@ -196,13 +205,12 @@ def main(m3u8_data, ts_path, m3u8_host, http_headers, arg_debug, debug_path, ski
         # Cmd need flush=True here:
         #ts_chunk_fname = os.path.basename(os.path.basename(ts_url).split('?')[0])
         if '://' not in ts_url:
-            if ts_url.startswith('/'):
-                ts_url = m3u8_host[:-1] + ts_url
-            else:
-                ts_url = m3u8_host + ts_url
-            print('[{}/{}] 处理中+ {}'.format( (ts_i+1), total_chunks, ts_url ), flush=True)
+            parsed = '+'
         else:
-            print('[{}/{}] 处理中 {}'.format( (ts_i+1), total_chunks, ts_url ), flush=True)
+            parsed = ''
+        ts_url = parse_url(m3u8_host, m3u8_base, ts_url)
+
+        print('[{}/{}] 处理中{} {}'.format( (ts_i+1), total_chunks, parsed, ts_url ), flush=True)
 
         enc_ts = get_req(ts_url, proxies=proxies)
 
@@ -233,7 +241,7 @@ def main(m3u8_data, ts_path, m3u8_host, http_headers, arg_debug, debug_path, ski
                         # BLOCK_SIZE 16 also related to crypto_py_aes.py
                         print('[i] 此段不满足 16 倍数解密。') # hang and 声音位移
                         success_pad = False
-                        ts_chunk_fname = os.path.basename(os.path.basename(ts_url).split('?')[0])
+                        ts_chunk_fname = str(uuid.uuid4()) + '.ts'
                         ts_chunk_fname_tmp = os.path.basename( '_'.join([ ts_chunk_fname, str(time.time()) + '.temp' ]) )
                         for i in range(1, 18):
                             try:

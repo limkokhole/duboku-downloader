@@ -43,7 +43,6 @@ if not PY3:
     print('\n[!] python 2 已在 2020 年退休。请使用 python 3。中止。')
     sys.exit(1)
 
-from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 
 #try: from urllib.request import urlopen #python3
@@ -462,13 +461,8 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                             with open('duboku_ep' + str(ep) + '.log', 'a') as f:
                                 f.write('r: ' + r.text)
 
-                        parsed_ep_uri = urlparse(ep_url)
-                        m3u8_host = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_ep_uri)
-                        if not m3u8_host.endswith('/'):
-                            m3u8_host = m3u8_host + '/'
-
                         # Disable `if` condition line below, if want to test convert .ts without re-download
-                        if m3u8_decryptopr_main(r.text, ep_ts_path, m3u8_host, http_headers, arg_debug, 'duboku_ep' + str(ep) + '.log', proxies=proxies):
+                        if m3u8_decryptopr_main(r.text, ep_ts_path, ep_url, http_headers, arg_debug, 'duboku_ep' + str(ep) + '.log', proxies=proxies):
                             remux_ts_to_mp4(ep_ts_path, ep_mp4_path)
 
                         #source_url = "https://tv2.xboku.com/20191126/wNiFeUIj/index.m3u8"
