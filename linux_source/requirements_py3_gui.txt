@@ -1,3 +1,4 @@
+pysocks
 tqdm
 calmjs
 calmjs.types
