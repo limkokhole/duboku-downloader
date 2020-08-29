@@ -43,6 +43,7 @@ if not PY3:
     print('\n[!] python 2 已在 2020 年退休。请使用 python 3。中止。')
     sys.exit(1)
 
+import tqdm
 from bs4 import BeautifulSoup
 
 #try: from urllib.request import urlopen #python3
@@ -520,7 +521,6 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                                 f.write('\n下载的 mp4 路径: ' + ep_mp4_path + '\n\n')
 
                         if is_vimeo:
-                            import tqdm
                             r = requests.get(ep_url, allow_redirects=True, headers=http_headers, timeout=30
                                 , proxies=proxies, stream=True)
                             chunk_size = 1024  # 1 MB
