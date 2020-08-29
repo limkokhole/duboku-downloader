@@ -291,6 +291,7 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
         else:
             proxies = {}
             print('[...] 无代理。')
+            
         for ep in range(arg_from_ep, arg_to_ep):
             url = ''.join([cinema_url_pre, cinema_id, cinema_url_middle, str(ep), cinema_url_post]) #don't override template cinema_url
             if arg_file:
@@ -304,6 +305,10 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                         f.write('URL: ' + url + '\n\n')
 
                 try:
+                    try:
+                        http_headers.pop('referer')
+                    except KeyError:
+                        pass
                     r = requests.get(url, allow_redirects=True, headers=http_headers, timeout=30, proxies=proxies)
                 except requests.exceptions.ConnectionError:
                     print('\n[!] 你的网络出现问题，也可能是网站的服务器问题。\n', flush=True)
@@ -321,6 +326,7 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
 
             ct_b64 = '' #reset
             passwd = '' #reset
+            http_headers.update({'referer': url})
 
             printed_err = False
             got_ep_url = False
@@ -349,6 +355,9 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                     #for w in walker.filter(tree, assignment):
                     #    print(w)
                     ep_url = '' #reset
+                    is_vimeo = False
+                    vimeo_qd = {}
+                    ep_mp4_path = None
                     for w in walker.filter(tree, calm_id):
                         if w.value == 'player_data':
                             for wa in walker.filter(tree, calm_assign):
@@ -365,7 +374,61 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
 
                                         continue
 
-                                    if rv.endswith('.m3u8"') or rv.endswith(".m3u8'"): #[todo:0] need check ' also ?
+                                    try:
+                                        if ep_url.split('/')[2].split('.')[1].lower() == 'vimeo':
+                                            # e.g. https://www.duboku.co/vodplay/1584-1-1.html 
+                                            # -> https://player.vimeo.com/video/452182074
+                                            is_vimeo = True
+
+                                            if arg_debug:
+                                                with open('duboku_ep' + str(ep) + '.log', 'a') as f:
+                                                    f.write('\n\nEP URL of VIMEO: ' + ep_url + '\n\n')
+                                            #print('呼叫 vimeo... ' + repr(ep_url))
+                                            r_iframe = requests.get(ep_url, allow_redirects=True, headers=http_headers, timeout=30, proxies=proxies)
+
+                                            if arg_debug:
+                                                with open('duboku_ep' + str(ep) + '.log', 'a') as f:
+                                                    f.write(r_iframe.text)
+                                            soup_iframe = BeautifulSoup(r_iframe.text, 'html.parser')
+                                            for vimeo_script in soup_iframe.find_all('script'):
+                                                tree = es5( vimeo_script.text )
+                                                for w in walker.filter(tree, calm_var):
+                                                    if w.identifier.value == 'config':
+                                                        for config_wp in w.initializer.properties:
+                                                            try:
+                                                                for config_wp2 in config_wp.right.properties:
+                                                                    for config_wp3 in config_wp2.right.properties:
+                                                                        if 'progressive' != config_wp3.left.value.strip('"').lower():
+                                                                                continue
+                                                                        try:
+                                                                            for config_wp4 in config_wp3.right.children():
+                                                                                next_width_k = '' 
+                                                                                next_url_v = ''
+                                                                                for config_wp5 in config_wp4.properties:
+                                                                                    if config_wp5.left.value.strip('"').lower() == 'width':
+                                                                                        next_width_k = config_wp5.right.value
+                                                                                        if next_url_v:
+                                                                                            vimeo_qd[int(next_width_k)] = next_url_v
+                                                                                    elif config_wp5.left.value.strip('"').lower() == 'url':
+                                                                                        next_url_v = config_wp5.right.value.strip('"')
+                                                                                        if next_width_k:
+                                                                                            vimeo_qd[int(next_width_k)] = next_url_v
+                                                                        except (TypeError, AttributeError):
+                                                                            print(traceback.format_exc())
+                                                            except (TypeError, AttributeError):
+                                                                pass
+                                    except IndexError:
+                                        print('Split ep url failed: ' + repr(ep_url))
+
+                                    if is_vimeo:
+                                        #print('vimeo 视频质量: ' + repr(vimeo_qd))
+                                        if not vimeo_qd:
+                                            continue
+                                        vimeo_qdk = list(vimeo_qd.keys())
+                                        vimeo_qdk.sort(key=int)
+                                        ep_url = vimeo_qd[int(vimeo_qdk[-1])]
+
+                                    elif rv.endswith('.m3u8"') or rv.endswith(".m3u8'"): #[todo:0] need check ' also ?
                                         pass
                                             
                                     else: #single video normally came here
@@ -403,8 +466,8 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                                                     decrypted_final_js = tree_iframe
                                                    
                                         if ct_b64: 
-                                            #print('ct b64 data: ' + repr(ct_b64))
-                                            #print('passwd: ' + repr(passwd))
+                                            print('ct b64 data: ' + repr(ct_b64))
+                                            print('passwd: ' + repr(passwd))
                                             decrypted_final_content = crypto_py_aes_main(ct_b64, passwd)
                                             decrypted_final_js = CalmParser().parse(decrypted_final_content.decode())
                                         #else: # No nid decrypt, direct use plain `decrypted_final_js = tree_iframe` above
@@ -442,28 +505,43 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                         if ep_url:
                             break
 
-                    if ep_url:
+                    if ep_url and ep_mp4_path:
                         got_ep_url = True
-                        #print('hole success')
                         print('下载的 url: ' + ep_url)
-                        print('下载的 ts 路径: ' + ep_ts_path)
+                        if not is_vimeo:
+                            print('下载的 ts 路径: ' + ep_ts_path)
                         print('下载的 mp4 路径: ' + ep_mp4_path)
 
                         if arg_debug:
                             with open('duboku_ep' + str(ep) + '.log', 'a') as f:
                                 f.write('\n\n下载的 url: ' + ep_url)
-                                f.write('\n下载的 ts 路径: ' + ep_ts_path)
+                                if not is_vimeo:
+                                    f.write('\n下载的 ts 路径: ' + ep_ts_path)
                                 f.write('\n下载的 mp4 路径: ' + ep_mp4_path + '\n\n')
 
-                        r = requests.get(ep_url, allow_redirects=True, headers=http_headers, timeout=30, proxies=proxies)
+                        if is_vimeo:
+                            import tqdm
+                            r = requests.get(ep_url, allow_redirects=True, headers=http_headers, timeout=30
+                                , proxies=proxies, stream=True)
+                            chunk_size = 1024  # 1 MB
+                            file_size = int(r.headers['Content-Length'])
+                            num_bars = 0 #int(file_size / chunk_size)
+                            with open(ep_mp4_path, 'wb') as fp:
+                                for chunk in tqdm.tqdm(r.iter_content(chunk_size=chunk_size), total=num_bars
+                                        , position=0, mininterval=5
+                                        , unit='KB', desc=ep_mp4_path, leave=True, file=sys.stdout):
+                                    fp.write(chunk)
+                        else:
 
-                        if arg_debug:
-                            with open('duboku_ep' + str(ep) + '.log', 'a') as f:
-                                f.write('r: ' + r.text)
+                            r = requests.get(ep_url, allow_redirects=True, headers=http_headers, timeout=30, proxies=proxies)
 
-                        # Disable `if` condition line below, if want to test convert .ts without re-download
-                        if m3u8_decryptopr_main(r.text, ep_ts_path, ep_url, http_headers, arg_debug, 'duboku_ep' + str(ep) + '.log', proxies=proxies):
-                            remux_ts_to_mp4(ep_ts_path, ep_mp4_path)
+                            if arg_debug:
+                                with open('duboku_ep' + str(ep) + '.log', 'a') as f:
+                                    f.write('r: ' + r.text)
+
+                            # Disable `if` condition line below, if want to test convert .ts without re-download
+                            if m3u8_decryptopr_main(r.text, ep_ts_path, ep_url, http_headers, arg_debug, 'duboku_ep' + str(ep) + '.log', proxies=proxies):
+                                remux_ts_to_mp4(ep_ts_path, ep_mp4_path)
 
                         #source_url = "https://tv2.xboku.com/20191126/wNiFeUIj/index.m3u8"
                         #https://stackoverflow.com/questions/52736897/custom-user-agent-in-youtube-dl-python-script

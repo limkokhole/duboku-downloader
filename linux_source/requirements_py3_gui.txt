@@ -1,3 +1,4 @@
+tqdm
 calmjs
 calmjs.types
 requests
