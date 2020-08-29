@@ -414,7 +414,7 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                                                                                         if next_width_k:
                                                                                             vimeo_qd[int(next_width_k)] = next_url_v
                                                                         except (TypeError, AttributeError):
-                                                                            print(traceback.format_exc())
+                                                                            pass #print(traceback.format_exc())
                                                             except (TypeError, AttributeError):
                                                                 pass
                                     except IndexError:
