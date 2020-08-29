@@ -2,6 +2,6 @@ pysocks
 tqdm
 calmjs
 calmjs.types
-requests
+requests[socks]
 pycryptodomex
 beautifulsoup4==4.7.1
