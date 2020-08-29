@@ -12,7 +12,7 @@ Windows (64-bit) 用户，只需要下载 "[独播库下载器_win_64_exe.zip](h
 
 你可以 `python3 duboku_gui.py` 打开图形界面，或 `python3 duboku_console.py -选项` 使用命令行界面。
 
-python3 用户必须先执行命令 `python3 -m pip install beautifulsoup4==4.7.1` 才能正常使用。其余 `pip` 的依赖请参考 requirements_py3_gui.txt(图形界面) 或 requirements_py3_console.txt(命令行) 文件。如使用 socks 可能需要 `python3 -m pip install -U requests[socks]`。
+python3 用户必须先执行命令 `python3 -m pip install beautifulsoup4==4.7.1` 才能正常使用。其余 `pip` 的依赖请参考 requirements_py3_gui.txt(图形界面) 或 requirements_py3_console.txt(命令行) 文件。如使用 socks ，需要 `python3 -m pip install pysocks` 及 `python3 -m pip install -U requests[socks]`。
 
 Linux 用户请确保安装了 `ffmpeg` 命令。 
 
