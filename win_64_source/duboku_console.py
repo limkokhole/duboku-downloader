@@ -285,7 +285,7 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
         if arg_proxy:
             arg_proxy = arg_proxy.strip()
         if arg_proxy:
-            if '://':
+            if '://' not in arg_proxy:
                 arg_proxy = 'http://' + arg_proxy
             proxies = { 'https': arg_proxy, }
             print('[...] 尝试代理: ' + proxies['https'])
