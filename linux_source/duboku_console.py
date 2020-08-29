@@ -310,8 +310,7 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                         http_headers.pop('referer')
                     except KeyError:
                         pass
-                    #r = requests.get(url, allow_redirects=True, headers=http_headers, timeout=30, proxies=proxies)
-                    r = requests.get(url, allow_redirects=True, headers=http_headers, timeout=30)
+                    r = requests.get(url, allow_redirects=True, headers=http_headers, timeout=30, proxies=proxies)
                 except requests.exceptions.ConnectionError:
                     print('\n[!] 你的网络出现问题，也可能是网站的服务器问题。\n', flush=True)
                     continue
