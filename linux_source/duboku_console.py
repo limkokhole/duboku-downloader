@@ -360,7 +360,7 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                     ep_url = '' #reset
                     is_vimeo = False
                     vimeo_qd = {}
-                    if not arg_file:
+                    if arg_dir:
                         ep_mp4_path = None
                     for w in walker.filter(tree, calm_id):
                         if w.value == 'player_data':
