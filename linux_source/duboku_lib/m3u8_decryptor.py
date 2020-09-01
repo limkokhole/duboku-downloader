@@ -38,6 +38,10 @@ from Cryptodome.Util.Padding import pad
 from .ffmpeg_lib import reset_ts_start_time 
 
 
+#import logging
+#logging.basicConfig(level=logging.DEBUG, format="%(message)s")
+
+
 def decrypt(data, key, iv, guest_padding_size):
     """Decrypt using AES CBC"""
     decryptor = AES.new(key, AES.MODE_CBC, IV=iv)
@@ -48,14 +52,14 @@ def decrypt(data, key, iv, guest_padding_size):
         return decryptor.decrypt(pad(data, guest_padding_size)) # You want pad to fill AND before decrypt, not unpad AND after decrypt. hexdump to view its last line not 16-bytes and need fill
     
 
-def get_req(url, proxies={}):
+def get_req(url, referer, proxies={}):
     """Get binary data from URL"""
 
     #data = ''
     #or chunk in requests.get(url, headers={'User-agent': 'Mozilla/5.0'}, stream=True):
     #    data += chunk
 
-    return requests.get(url, headers={'User-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.0.0 Safari/537.36'}, stream=True, proxies=proxies).content
+    return requests.get(url, headers={'User-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.0.0 Safari/537.36', 'Referer': referer}, stream=True, proxies=proxies).content
     #return requests.get(url, headers={'User-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.0.0 Safari/537.36'}, stream=False, proxies=proxies).content #tested 1 proxy not able use stream=False
     #if r.status_code == 200:
     #    #r.raw.decode_content = True
@@ -157,13 +161,15 @@ def main(m3u8_data, ts_path, ep_url, http_headers, arg_debug, debug_path, skip_a
     chunks = re.findall('#EXT-X-KEY:METHOD=AES-128,URI="(.*)",IV=(.*)\s.*\s(.*)', sub_data)
 
     print(('[1] chunks: ' + repr(chunks)))
+    #print('[1.5] m3u8 host: ' + repr(m3u8_host))
+    referer = m3u8_host + 'static/player/videojs.html'
 
     if not chunks:
         chunks = re.findall('#EXT-X-KEY:METHOD=AES-128,URI="(.*)"', sub_data)
         print(('[2] chunks: ' + repr(chunks)))
         if chunks:
             key_url = parse_url(m3u8_host, m3u8_base, chunks[0])
-            key = get_req(key_url, proxies=proxies)
+            key = get_req(key_url, referer, proxies=proxies)
             iv = key
         else:
             print('No need decrypt.')
@@ -182,7 +188,7 @@ def main(m3u8_data, ts_path, ep_url, http_headers, arg_debug, debug_path, skip_a
     else:
         chunks = chunks[0]
         key_url = parse_url(m3u8_host, m3u8_base, chunks[0])
-        key = get_req(key_url, proxies=proxies)
+        key = get_req(key_url, referer, proxies=proxies)
         iv = chunks[1][2:]
         #iv = iv.decode('hex')
         for d in sub_data.split('\n'):
@@ -212,7 +218,7 @@ def main(m3u8_data, ts_path, ep_url, http_headers, arg_debug, debug_path, skip_a
 
         print('[{}/{}] 处理中{} {}'.format( (ts_i+1), total_chunks, parsed, ts_url ), flush=True)
 
-        enc_ts = get_req(ts_url, proxies=proxies)
+        enc_ts = get_req(ts_url, referer, proxies=proxies)
 
         #print(enc_ts)
         #print(dir(enc_ts))

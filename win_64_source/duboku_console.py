@@ -37,7 +37,6 @@ from slimit.visitors import nodevisitor
 
 import sys, os, traceback
 import requests
-
 PY3 = sys.version_info[0] >= 3
 if not PY3:
     print('\n[!] python 2 已在 2020 年退休。请使用 python 3。中止。')
@@ -278,6 +277,9 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                 
             init(order);
         })
+
+        # https://u.tudu.site/vodplay/1554-1-38.html (some UA blocked including Chrome, but can use other UA OR use correct referer):
+        var player_data={"flag":"play","encrypt":0,"trysee":0,"points":0,"link":"\/vodplay\/1554-1-1.html","link_next":"","link_pre":"\/vodplay\/1554-1-37.html","url":"https:\/\/tv.wedubo.com\/20200901\/69OYAim7\/index.m3u8","url_next":"","from":"videojs-tv.js","server":"no","note":"","id":"1554","sid":1,"nid":38}
         '''
 
         CP = CalmParser()
