@@ -71,6 +71,8 @@ from duboku_lib.m3u8_decryptor import main as m3u8_decryptopr_main
 from duboku_lib.ffmpeg_lib import remux_ts_to_mp4 
 from duboku_lib.crypto_py_aes import main as crypto_py_aes_main
 
+import logging, http.client
+
 import argparse
 from argparse import RawTextHelpFormatter
 arg_parser = argparse.ArgumentParser(
@@ -304,6 +306,14 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
             try:
 
                 if arg_debug:
+                    #logging.basicConfig(level=logging.DEBUG, format="%(message)s")
+                    http.client.HTTPConnection.debuglevel = 1
+                    logging.basicConfig(filename='duboku_ep' + str(ep) + '.log')
+                    logging.getLogger().setLevel(logging.DEBUG)
+                    requests_log = logging.getLogger("requests.packages.urllib3")
+                    requests_log.setLevel(logging.DEBUG)
+                    requests_log.propagate = True
+
                     with open('duboku_ep' + str(ep) + '.log', 'w') as f:
                         f.write('URL: ' + url + '\n\n')
 

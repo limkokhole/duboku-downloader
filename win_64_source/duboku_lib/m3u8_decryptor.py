@@ -38,10 +38,6 @@ from Cryptodome.Util.Padding import pad
 from .ffmpeg_lib import reset_ts_start_time 
 
 
-#import logging
-#logging.basicConfig(level=logging.DEBUG, format="%(message)s")
-
-
 def decrypt(data, key, iv, guest_padding_size):
     """Decrypt using AES CBC"""
     decryptor = AES.new(key, AES.MODE_CBC, IV=iv)
@@ -243,6 +239,7 @@ def main(m3u8_data, ts_path, ep_url, http_headers, arg_debug, debug_path, skip_a
                     try:
                         dec_ts = decrypt(enc_ts, key, iv, 0)
                         f.write(dec_ts)
+                        #raise ValueError # TESTING PURPOSE
                     except ValueError:
                         # BLOCK_SIZE 16 also related to crypto_py_aes.py
                         print('[i] 此段不满足 16 倍数解密。') # hang and 声音位移
@@ -255,9 +252,11 @@ def main(m3u8_data, ts_path, ep_url, http_headers, arg_debug, debug_path, skip_a
                                 with open(ts_chunk_fname_tmp, 'wb') as ts_cf:
                                     ts_cf.write(dec_ts)
                                     print('[+] 填充 ' + str(i) +  ' 字节成功。')
-                                ts_chunk_reseted_fname = reset_ts_start_time(ts_chunk_fname_tmp, ts_chunk_fname)
+                                ts_chunk_reseted_fname, success = reset_ts_start_time(ts_chunk_fname_tmp, ts_chunk_fname)
                                 with open(ts_chunk_reseted_fname, 'rb') as ts_crf:
                                     f.write(ts_crf.read())
+                                if arg_debug and (not success):
+                                    raise Exception
                                 try:
                                     os.remove(ts_chunk_reseted_fname)
                                 except OSError:

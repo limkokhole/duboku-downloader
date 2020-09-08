@@ -16,22 +16,23 @@ def reset_ts_start_time(ts_broken_path, ts_reset_path):
             print('[😞] 转换失败, 文件不存在。')
         except UnicodeEncodeError:
             print('[!] 修复失败, 文件不存在。')
-        return 127
+        return ts_broken_path, False
 
     retval = proc.wait()
+    #retval = 1 # TESTING PURPOSE
     if retval == 0:
         print('[+] 修复完成。 {}'.format(ts_reset_path) )
         try:
             os.remove(ts_broken_path)
         except OSError as e: 
             print("[!] 删除已损 .ts 文件失败: %s - %s。" % (e.filename, e.strerror))
-        return ts_reset_path
+        return ts_reset_path, True
     else: #1
         try:
             print('[😞] 修复失败。')
         except UnicodeEncodeError:
             print('[!] 修复失败。')
-        return ts_broken_path
+        return ts_broken_path, False
 
 def remux_ts_to_mp4(ts_path, mp4_path):
 
