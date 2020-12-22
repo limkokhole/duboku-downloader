@@ -37,6 +37,7 @@ from slimit.visitors import nodevisitor
 
 import sys, os, traceback
 import requests
+from requests.adapters import TimeoutSauce
 PY3 = sys.version_info[0] >= 3
 if not PY3:
     print('\n[!] python 2 已在 2020 年退休。请使用 python 3。中止。')
@@ -322,7 +323,34 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                         http_headers.pop('referer')
                     except KeyError:
                         pass
-                    r = requests.get(url, allow_redirects=True, headers=http_headers, timeout=30, proxies=proxies)
+
+                    init_t = 1
+                    init_a = 0
+                    total_t = 0
+                    s = requests.Session()
+                    success_from_read = False
+                    while 1:
+                        try:
+                            if total_t >= 120:
+                                return None
+                            if ( (init_a % 6) == 0) and (init_t < 30):
+                                init_t+=1
+                            total_t+=init_t
+                            r = s.get(url, allow_redirects=True, headers=http_headers, timeout=init_t, proxies=proxies)
+                            #success_from_read = False
+                            break
+                        except requests.exceptions.ConnectTimeout:
+                            init_a+=1
+                        except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
+                            success_from_read = True
+                            break
+                    if success_from_read: # since we use Session(), so can reuse the "connected" session!
+                        try:
+                            r = s.get(url, allow_redirects=True, headers=http_headers, timeout=30, proxies=proxies)
+                        except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
+                            print('[!A] 失败。')
+                            continue
+
                 except requests.exceptions.ConnectionError:
                     print('\n[!] 你的网络出现问题，也可能是网站的服务器问题。\n', flush=True)
                     continue
@@ -452,7 +480,32 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                                             with open('duboku_ep' + str(ep) + '.log', 'a') as f:
                                                 f.write('\n\nEP URL: ' + ep_url + '\n\n')
 
-                                        r_iframe = requests.get(ep_url, allow_redirects=True, headers=http_headers, timeout=30, proxies=proxies)
+                                        init_t = 1
+                                        init_a = 0
+                                        total_t = 0
+                                        s = requests.Session()
+                                        success_from_read = False
+                                        while 1:
+                                            try:
+                                                if total_t >= 120:
+                                                    return None
+                                                if ( (init_a % 6) == 0) and (init_t < 30):
+                                                    init_t+=1
+                                                total_t+=init_t
+                                                r_iframe = s.get(ep_url, allow_redirects=True, headers=http_headers, timeout=init_t, proxies=proxies)
+                                                #success_from_read = False
+                                                break
+                                            except requests.exceptions.ConnectTimeout:
+                                                init_a+=1
+                                            except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
+                                                success_from_read = True
+                                                break
+                                        if success_from_read: # since we use Session(), so can reuse the "connected" session!
+                                            try:
+                                                r_iframe = s.get(ep_url, allow_redirects=True, headers=http_headers, timeout=30, proxies=proxies)
+                                            except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
+                                                print('[!B] 失败。')
+                                                continue
 
                                         if arg_debug:
                                             with open('duboku_ep' + str(ep) + '.log', 'a') as f:
@@ -546,7 +599,32 @@ def main(arg_dir, arg_file, arg_from_ep, arg_to_ep, arg_url, custom_stdout, arg_
                                     fp.write(chunk)
                         else:
 
-                            r = requests.get(ep_url, allow_redirects=True, headers=http_headers, timeout=30, proxies=proxies)
+                            init_t = 1
+                            init_a = 0
+                            total_t = 0
+                            s = requests.Session()
+                            success_from_read = False
+                            while 1:
+                                try:
+                                    if total_t >= 120:
+                                        return None
+                                    if ( (init_a % 6) == 0) and (init_t < 30):
+                                        init_t+=1
+                                    total_t+=init_t
+                                    r = s.get(ep_url, allow_redirects=True, headers=http_headers, timeout=init_t, proxies=proxies)
+                                    #success_from_read = False
+                                    break
+                                except requests.exceptions.ConnectTimeout:
+                                    init_a+=1
+                                except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
+                                    success_from_read = True
+                                    break
+                            if success_from_read: # since we use Session(), so can reuse the "connected" session!
+                                try:
+                                    r = s.get(ep_url, allow_redirects=True, headers=http_headers, timeout=30, proxies=proxies)
+                                except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
+                                    print('[!C] 失败。')
+                                    continue
 
                             if arg_debug:
                                 with open('duboku_ep' + str(ep) + '.log', 'a') as f:

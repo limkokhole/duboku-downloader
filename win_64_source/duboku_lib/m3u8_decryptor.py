@@ -55,7 +55,31 @@ def get_req(url, referer, proxies={}):
     #or chunk in requests.get(url, headers={'User-agent': 'Mozilla/5.0'}, stream=True):
     #    data += chunk
 
-    return requests.get(url, headers={'User-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.0.0 Safari/537.36', 'Referer': referer}, stream=True, proxies=proxies).content
+    init_t = 0.3
+    init_a = 0
+    total_t = 0
+    s = requests.Session()
+    success_from_read = False
+    while 1:
+        try:
+            if total_t >= 120:
+                return None
+            if ( (init_a % 6) == 0) and (init_t < 30):
+                init_t+=0.3
+            total_t+=init_t
+            return s.get(url, headers={'User-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.0.0 Safari/537.36', 'Referer': referer}, stream=True, timeout=init_t, proxies=proxies).content
+            #success_from_read = False
+        except requests.exceptions.ConnectTimeout:
+            init_a+=1
+        except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
+            success_from_read = True
+            for t in (10, 20, 30, 60):
+                try:
+                    return s.get(url, headers={'User-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.0.0 Safari/537.36', 'Referer': referer}, stream=True, timeout=t, proxies=proxies).content
+                except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
+                    pass
+            return None
+
     #return requests.get(url, headers={'User-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.0.0 Safari/537.36'}, stream=False, proxies=proxies).content #tested 1 proxy not able use stream=False
     #if r.status_code == 200:
     #    #r.raw.decode_content = True
@@ -86,7 +110,6 @@ def main(m3u8_data, ts_path, ep_url, http_headers, arg_debug, debug_path, skip_a
     m3u8_data += '#EXTM3U\n#EXT-X-STREAM-INF:PROGRAM-ID=1,\
     BANDWIDTH=1663000,RESOLUTION=465x1080\n/ppvod/XYZhNcTU\n'
     '''
-
     m3u8_host = '{uri.scheme}://{uri.netloc}/'.format(uri= urlparse(ep_url) )
     m3u8_base = urljoin(ep_url, '.')
 
@@ -127,8 +150,31 @@ def main(m3u8_data, ts_path, ep_url, http_headers, arg_debug, debug_path, skip_a
                     with open(debug_path, 'a') as f:
                         f.write('\n\nM3U8 URL: ' + real_m3u8_url + '\n\n')
 
-                real_m3u8_data = requests.get(real_m3u8_url, allow_redirects=True,
-                                    headers=http_headers, timeout=30, proxies=proxies).text
+                init_t = 1
+                init_a = 0
+                total_t = 0
+                s = requests.Session()
+                success_from_read = False
+                while 1:
+                    try:
+                        if total_t >= 120:
+                            return None
+                        if ( (init_a % 6) == 0) and (init_t < 30):
+                            init_t+=1
+                        total_t+=init_t
+                        real_m3u8_data = s.get(real_m3u8_url, allow_redirects=True, headers=http_headers, timeout=init_t, proxies=proxies).text
+                        #success_from_read = False
+                        break
+                    except requests.exceptions.ConnectTimeout:
+                        init_a+=1
+                    except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
+                        success_from_read = True
+                        break
+                if success_from_read: # since we use Session(), so can reuse the "connected" session!
+                    try:
+                        real_m3u8_data = s.get(real_m3u8_url, allow_redirects=True, headers=http_headers, timeout=30, proxies=proxies).text
+                    except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
+                        print((traceback.format_exc()))
 
                 if arg_debug:
                     with open(debug_path, 'a') as f:
@@ -215,6 +261,9 @@ def main(m3u8_data, ts_path, ep_url, http_headers, arg_debug, debug_path, skip_a
         print('[{}/{}] 处理中{} {}'.format( (ts_i+1), total_chunks, parsed, ts_url ), flush=True)
 
         enc_ts = get_req(ts_url, referer, proxies=proxies)
+        if enc_ts is None:
+            print('[-] 网络问题，放弃此段。')
+            continue
 
         #print(enc_ts)
         #print(dir(enc_ts))
