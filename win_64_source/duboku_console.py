@@ -37,7 +37,6 @@ from slimit.visitors import nodevisitor
 
 import sys, os, traceback
 import requests
-from requests.adapters import TimeoutSauce
 PY3 = sys.version_info[0] >= 3
 if not PY3:
     print('\n[!] python 2 已在 2020 年退休。请使用 python 3。中止。')
